@@ -84,12 +84,17 @@ def first_execution():
         )
     ''')
 
-def get_values(table, identifier, id_value):
+def get_values(table, identifier, id_value, tests):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = f"""SELECT * FROM {table} WHERE {identifier} = %s"""
+    tests_str = ', '.join(tests)
+
+    if tests == None:
+        query = f"""SELECT * FROM {table} WHERE {identifier} = %s"""
+    else:
+        query = f"""SELECT HASH, {tests_str} FROM {table} WHERE {identifier} = %s"""
 
     try:
         cursor = cnx.cursor()

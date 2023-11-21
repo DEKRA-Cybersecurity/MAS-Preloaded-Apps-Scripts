@@ -2,12 +2,19 @@
 
 start=$(date +"%T")
 path=$(pwd)
+delete_files=$1
+apk_path='apks/*'
+if [ "$delete_files" == "False" ]; then 
+	apk_path='unit_tests/reference_apk/*'
+fi
+
+
 
 jadxFunction()
 {
 	mkdir $absolute_dir/decompiled;
 	# Ejecuta el jadx
-	../../tools/jadx/bin/jadx -d $absolute_dir/decompiled $absolute_dir/base.apk;
+	"$path/tools/jadx/bin/jadx" -d $absolute_dir/decompiled $absolute_dir/base.apk;
 	#jadx -d $absolute_dir/decompiled $absolute_dir/base.apk;
 
 	# Estos dos greps se encargan de extraer las URLs dentro del codigo.
@@ -36,22 +43,22 @@ jadxFunction()
 	      has_internet=0
 	    fi
 	fi
-	cd ..
-	python3 ../main.py $absolute_dir $has_internet;
+	cd $path
+	python3 main.py $absolute_dir $has_internet;
 	sleep 2
 }
 
 apktoolFunction()
 {
-	for dir in apks/*
+	for dir in $apk_path
 	do
 		absolute_dir=`realpath $dir`;
 		mv $absolute_dir/*.apk $absolute_dir/base.apk 2>/dev/null;
 		cd $absolute_dir
 		if [[ $(ls | grep -x base | wc -l) -eq 0 && $(ls | grep -x base.apk | wc -l) -eq 1 && ! -f "apkTool.txt"  ]]; then			
-			../../tools/apktool d $absolute_dir/base.apk 1>/dev/null;
+			"$path/tools/apktool" d $absolute_dir/base.apk 1>/dev/null;
 			if [ $? -ne 0 ]; then
-				../../tools/apktool d -f --no-res $absolute_dir/base.apk;
+				"$path/tools/apktool" d -f --no-res $absolute_dir/base.apk;
 			fi
 			touch apkTool.txt
 			jadxFunction
@@ -64,8 +71,10 @@ apktoolFunction()
 					apktoolFunction
 				done
 			else
-				rm -r $absolute_dir/base;
-				rm -r $absolute_dir/decompiled;
+				if [ "$delete_files" != "False" ]; then 
+					rm -r $absolute_dir/base;
+					rm -r $absolute_dir/decompiled;
+				fi
 				cd $path
 			fi
 		else
@@ -98,3 +107,5 @@ python3 utils/collect_data.py;
 find . -name "apkTool.txt" -exec rm {} \;
 
 finish=$(date +"%T")
+
+echo "Analysis successfully executed"

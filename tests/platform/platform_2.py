@@ -2,7 +2,7 @@ import subprocess
 import datetime
 import db.database_utils as database_utils
 
-def check(wdir, apk_hash):
+def check(wdir, apk, apk_hash, package_name):
     '''
     The primary objective is to search for potential SQL injection in queries.
     A main regex to search for these queries is applied. 
@@ -20,6 +20,7 @@ def check(wdir, apk_hash):
 
     docker run fsecurelabs/drozer /bin/bash -c "drozer console connect --server 192.168.3.14 -c 'run scanner.provider.injection -a com.android.chrome'";
     '''
+    verdict = 'FAIL'
     total_matches = 0
     vuln_parameters = ["\"\\\"[ ]*(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|SELECT|UPDATE|UNION( +ALL){0,1})[a-zA-Z0-9\\ \\*_\\-]+(\=)(\\ |\\\")[ ]?\\\+\"", "\"(shouldOverrideUrlLoading\\(.*\\{)[\\n\\s\\t]*return false;(\\n|[\\s\\t])\\}\""]
     #cmd_webview = f'grep -rnwz -E {wdir}/decompiled | wc -l'
@@ -42,5 +43,8 @@ def check(wdir, apk_hash):
     else:
         database_utils.update_values("Report", "PLATFORM_2", "Pass", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "PLATFORM_2", 0, "HASH", apk_hash)
+        verdict = 'PASS'
 
     print('PLATFORM-2 successfully tested.')
+
+    return verdict

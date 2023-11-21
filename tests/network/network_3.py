@@ -3,7 +3,8 @@ import datetime
 import db.database_utils as database_utils
 from utils.auxiliar_functions import get_suid_from_manifest
 
-def check(wdir, package_name, apk_hash):
+def check(wdir, apk, apk_hash, package_name):
+    verdict = 'FAIL'
     net_config = False
     low_target_Sdk = False
     total_matches = 0
@@ -49,6 +50,7 @@ def check(wdir, package_name, apk_hash):
                 "Report", "NETWORK_3", "Needs Review", "HASH", apk_hash)
             database_utils.update_values(
                 "Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            verdict = 'Needs Review'
         elif net_config == False and low_target_Sdk == True and total_matches == 0:
             database_utils.update_values(
                 "Report", "NETWORK_3", "Fail", "HASH", apk_hash)
@@ -59,5 +61,8 @@ def check(wdir, package_name, apk_hash):
                 "Report", "NETWORK_3", "Pass", "HASH", apk_hash)
             database_utils.update_values(
                 "Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            verdict = 'PASS'
             
     print('NETWORK-3 successfully tested.')
+
+    return verdict

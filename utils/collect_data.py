@@ -3,10 +3,11 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 import mysql.connector  # Import MySQL connector library
 # from ..settings import DB_USER_MASA, DB_PASSWORD_MASA
+import yaml
 
 import sys
 sys.path.append('./')
-import formula
+import utils.formula as formula
 from db import database_utils
 from sqlalchemy import create_engine
  
@@ -66,7 +67,13 @@ for row in dataframe_to_rows(df_table4, index=False, header=True):
 # Formula execution and data extraction
 
 database_utils.unify_suid_permissions()
-value = formula.calculate_formula(0.01, 0.01)
+# Obtener la lista de tests del yaml
+with open('config/methods_config.yml') as f:
+        config = yaml.load(f, Loader=yaml.SafeLoader)
+
+tests_list = [value.upper() for values in config['tests'].values() for value in values]
+
+value = formula.calculate_formula(0.01, 0.01, tests_list)
 
 
 sheet3.append(["Formula Value"])

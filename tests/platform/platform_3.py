@@ -1,13 +1,14 @@
 import xml.etree.ElementTree as ET
 import db.database_utils as database_utils
 
-def check(wdir, apk_hash):
+def check(wdir, apk, apk_hash, package_name):
     '''
     Extract custom url from the application.
 
     It extracts the scheme and the path defined. However, for this version it counts the number of custom URL scheme found
     to filter out those applications that have no custom URL in place.
     '''
+    verdict = 'PASS'
     root = ET.parse(f'{wdir}/base/AndroidManifest.xml').getroot()
     activity_urls_dict = {}
 
@@ -51,8 +52,11 @@ def check(wdir, apk_hash):
     if len(activity_urls_dict) > 0:
         database_utils.update_values("Report", "PLATFORM_3", "Needs Review", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
+        verdict = 'Needs Review'
     else:
         database_utils.update_values("Report", "PLATFORM_3", "Pass", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
 
     print('PLATFORM-3 successfully tested.')
+
+    return verdict

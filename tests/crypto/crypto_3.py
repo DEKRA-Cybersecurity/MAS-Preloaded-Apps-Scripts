@@ -2,11 +2,12 @@ import subprocess
 import datetime
 import db.database_utils as database_utils
 
-def check(wdir, apk_hash):
+def check(wdir, apk, apk_hash, package_name):
     '''
         Check for potentially vulnerable algorithms in the code.
         If a match is found, FAIL is set, otherwise PASS
     '''
+    verdict = 'FAIL'
     total_matches = 0
     vuln_algo = ["\"AES/CBC/PKCS5Padding\"", "\"DES/CBC/PKCS5Padding\"", "\".*/ECB/.*\"", "\"^(TLS).*-CBC-.*\""]
 
@@ -27,4 +28,8 @@ def check(wdir, apk_hash):
     else:
         database_utils.update_values("Report", "CRYPTO_3", "Pass", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "CRYPTO_3", 0, "HASH", apk_hash)
+        verdict = 'PASS'
+
     print('CRYPTO-3 successfully tested.')
+
+    return verdict
