@@ -164,3 +164,20 @@ def load_and_execute_methods(config, all_params, applies):
                 print(f"Failed to import module {module_name}: {e}")
             except AttributeError:
                 print(f"Method check not found in {module_name}")
+
+def use_semgrep():
+    with open('config/methods_config.yml') as f:
+        config = yaml.load(f, Loader=yaml.SafeLoader)
+
+    use = bool(config.get("semgrep", {}).get("use"))
+
+    return use
+
+def dekra_script_version():
+    with open('config/methods_config.yml') as f:
+        config = yaml.load(f, Loader=yaml.SafeLoader)
+
+    version = config.get("version", {})
+
+    return str(version)
+    

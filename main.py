@@ -2,7 +2,8 @@
 
 import sys
 import os
-from utils.auxiliar_functions import check_package_name, check_hash_apk, check_app
+from utils.auxiliar_functions import check_package_name, check_hash_apk, check_app, use_semgrep
+from utils.semgrep_functions import semgrep_scan
 
 
 '''
@@ -14,7 +15,11 @@ See README.txt for execution instructions
 
 def main():
 
-    check_app(wdir, apk, apk_hash, package_name, internet)
+    if semgrep:
+        semgrep_scan(wdir, apk_hash, package_name)
+    else:
+        check_app(wdir, apk, apk_hash, package_name, internet)
+
 
 if __name__ == "__main__":
 
@@ -23,5 +28,6 @@ if __name__ == "__main__":
     package_name = check_package_name(wdir, os.path.basename(wdir))
     apk = 'base.apk'
     apk_hash = check_hash_apk(wdir)
+    semgrep = use_semgrep()
 
     sys.exit(main())

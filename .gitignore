@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache
+
+# Apks to scan
+apks/
+
+# Virtual env
+myenv/
+
+# Unit tests
+
+unit_tests/reference_apk/*.txt
+unit_tests/reference_apk/Calendar/*.txt
+unit_tests/reference_apk/Calendar/base
+unit_tests/reference_apk/Calendar/decompiled
+unit_tests/reference_apk/Calendar/{}

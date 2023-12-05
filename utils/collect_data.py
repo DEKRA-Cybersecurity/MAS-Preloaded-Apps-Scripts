@@ -10,6 +10,7 @@ sys.path.append('./')
 import utils.formula as formula
 from db import database_utils
 from sqlalchemy import create_engine
+from utils.auxiliar_functions import use_semgrep, dekra_script_version
  
 # Replace with your actual database connection details
 db_config = {
@@ -19,70 +20,98 @@ db_config = {
     "database": "automated_MASA"
 }
 
-# Function to extract data from the database for Report table
-def extract_data_table1():
+TABLE_REPORT = 'Report'
+TABLE_FAIL_COUNTS = 'Total_Fail_Counts'
+TABLE_LOGGING = 'Logging'
+TABLE_SEMGREP = 'SEMGREP_FINDINGS'
+
+def extract_data(table_name):
     engine = create_engine(f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')    
-    query = "SELECT * FROM Report"
+    query = "SELECT * FROM " + table_name
     df = pd.read_sql(query, engine)
     return df
 
-# Function to extract data from the database for Total Fail Counts table
-def extract_data_table2():
-    engine = create_engine(f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')    
-    query = "SELECT * FROM Total_Fail_Counts"
-    df = pd.read_sql(query, engine)
-    return df
 
-# Function to extract data from the database for Logging table
-def extract_data_table4():
-    engine = create_engine(f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')    
-    query = "SELECT * FROM Logging"
-    df = pd.read_sql(query, engine)
-    return df
+def collect_data_dekra(dekra):
+    # Extract data from the database
+    report_table = extract_data(TABLE_REPORT)
+    fail_counts_table = extract_data(TABLE_FAIL_COUNTS)
+    logging_table = extract_data(TABLE_LOGGING)
 
-# Extract data from the database
-df_table1 = extract_data_table1()
-df_table2 = extract_data_table2()
-df_table4 = extract_data_table4()
+    # Create a new Excel workbook
+    workbook = Workbook()
+    report_sheet = workbook.create_sheet(title='Report')
+    fail_counts_sheet = workbook.create_sheet(title='Total_Fail_Counts')
+    formula_sheet = workbook.create_sheet(title='Formula')
+    logging_sheet = workbook.create_sheet(title='Logging')
 
-# Create a new Excel workbook
-workbook = Workbook()
-sheet1 = workbook.create_sheet(title='Report')
-sheet2 = workbook.create_sheet(title='Total_Fail_Counts')
-sheet3 = workbook.create_sheet(title='Formula')
-sheet4 = workbook.create_sheet(title='Logging')
+    # Convert DataFrames to rows and write to the corresponding sheets
+    for row in dataframe_to_rows(report_table, index=False, header=True):
+        report_sheet.append(row)
 
-# Convert DataFrames to rows and write to the corresponding sheets
-for row in dataframe_to_rows(df_table1, index=False, header=True):
-    sheet1.append(row)
+    for row in dataframe_to_rows(fail_counts_table, index=False, header=True):
+        fail_counts_sheet.append(row)
 
-for row in dataframe_to_rows(df_table2, index=False, header=True):
-    sheet2.append(row)
+    for row in dataframe_to_rows(logging_table, index=False, header=True):
+        logging_sheet.append(row)
 
-for row in dataframe_to_rows(df_table4, index=False, header=True):
-    sheet4.append(row)
+    # Formula execution and data extraction
+    database_utils.unify_suid_permissions()
+
+    # Obtain test list
+    with open('config/methods_config.yml') as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
+
+    tests_list = [value.upper() for values in config['tests'].values() for value in values]
+
+    value = formula.calculate_formula(0.01, 0.01, tests_list)
+
+    formula_sheet.append(["Formula Value"])
+    formula_sheet.append([value])
+
+    # Remove the default empty sheet created by openpyxl
+    if 'Sheet' in workbook.sheetnames:
+        default_sheet = workbook['Sheet']
+        workbook.remove(default_sheet)
+
+    version = dekra_script_version()
+
+    # Save the workbook to a file
+    workbook.save('./apks/Preload_Analysis_' + version + '.xlsx')
 
 
+def collect_data_semgrep(dekra):
+    report_table = extract_data(TABLE_REPORT)
+    finding_table = extract_data(TABLE_SEMGREP)
 
-# Formula execution and data extraction
+    # Create a new Excel workbook
+    workbook = Workbook()
+    report_sheet = workbook.create_sheet(title='Report')
+    report_findings = workbook.create_sheet(title='Findings')
 
-database_utils.unify_suid_permissions()
-# Obtener la lista de tests del yaml
-with open('config/methods_config.yml') as f:
-        config = yaml.load(f, Loader=yaml.SafeLoader)
+    # Convert DataFrames to rows and write to the corresponding sheets
+    for row in dataframe_to_rows(report_table, index=False, header=True):
+        report_sheet.append(row)
 
-tests_list = [value.upper() for values in config['tests'].values() for value in values]
+    # Convert DataFrames to rows and write to the corresponding sheets
+    for row in dataframe_to_rows(finding_table, index=False, header=True):
+        report_findings.append(row)
+    
+    # Remove the default empty sheet created by openpyxl
+    if 'Sheet' in workbook.sheetnames:
+        default_sheet = workbook['Sheet']
+        workbook.remove(default_sheet)
 
-value = formula.calculate_formula(0.01, 0.01, tests_list)
+    version = dekra_script_version()
 
+    # Save the workbook to a file
+    workbook.save('./apks/Preload_Analysis_' + version + '.xlsx')
 
-sheet3.append(["Formula Value"])
-sheet3.append([value])
+if __name__ == "__main__":
+    # Averiguar si se ha usado semgrep o no
+    dekra = not use_semgrep()
 
-# Remove the default empty sheet created by openpyxl
-if 'Sheet' in workbook.sheetnames:
-    default_sheet = workbook['Sheet']
-    workbook.remove(default_sheet)
-
-# Save the workbook to a file
-workbook.save('./apks/Preload_Analysis.xlsx')
+    if dekra:
+        collect_data_dekra(dekra)
+    else:
+        collect_data_semgrep(dekra)

@@ -1,3 +1,4 @@
+version: 1.0
 tests:
   code:
     - code_1
@@ -14,6 +15,8 @@ tests:
     - platform_3
   storage:
     - storage_2
+semgrep:
+  use: True
 permissions:
   android.permission.INSTALL_PACKAGES:
     weight: 100

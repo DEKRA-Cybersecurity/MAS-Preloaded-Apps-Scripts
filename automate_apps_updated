@@ -99,6 +99,8 @@ splitAPKs()
 	done
 }
 
+python3 -c "from db.database_utils import clear_database; clear_database()";
+
 splitAPKs
 apktoolFunction
 
