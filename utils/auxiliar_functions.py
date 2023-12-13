@@ -131,10 +131,10 @@ def check_network_applies(wdir, apk_hash, internet):
 
     return applies
 
-def check_app(wdir, apk, apk_hash, package_name, internet):
+def check_app(wdir, apk, apk_hash, package_name, internet, semgrep):
 
     print("Starting scanning process...")
-    database_utils.insert_values_report(apk_hash, package_name)
+    database_utils.insert_values_report(apk_hash, package_name, semgrep)
     database_utils.insert_values_total_fail_count(apk_hash)
 
     with open('config/methods_config.yml') as f:

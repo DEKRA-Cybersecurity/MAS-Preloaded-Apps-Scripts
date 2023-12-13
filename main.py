@@ -18,7 +18,7 @@ def main():
     if semgrep:
         semgrep_scan(wdir, apk_hash, package_name)
     else:
-        check_app(wdir, apk, apk_hash, package_name, internet)
+        check_app(wdir, apk, apk_hash, package_name, internet, semgrep)
 
 
 if __name__ == "__main__":

@@ -183,15 +183,15 @@ def insert_new_report(report_data):
         print(f'FAIL: {e}')
         return "failed"
 
-def insert_values_report(apk_hash, app_name):
+def insert_values_report(apk_hash, app_name, semgrep):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = """INSERT INTO Report (HASH, APP_NAME) VALUES (%s, %s)"""
+    query = """INSERT INTO Report (HASH, APP_NAME, SEMGREP) VALUES (%s, %s, %s)"""
     
     try:    
-        cursor.execute(query, (apk_hash, app_name))
+        cursor.execute(query, (apk_hash, app_name, semgrep))
         cnx.commit()
         return "success"
     except:
