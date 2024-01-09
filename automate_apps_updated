@@ -4,11 +4,10 @@ start=$(date +"%T")
 path=$(pwd)
 delete_files=$1
 apk_path='apks/*'
+resultsPath='apks/Results/'
 if [ "$delete_files" == "False" ]; then 
 	apk_path='unit_tests/reference_apk/*'
 fi
-
-
 
 jadxFunction()
 {
@@ -71,18 +70,17 @@ apktoolFunction()
 					apktoolFunction
 				done
 			else
-				if [ "$delete_files" != "False" ]; then 
-					rm -r $absolute_dir/base;
-					rm -r $absolute_dir/decompiled;
-				fi
+				# if [ "$delete_files" != "False" ]; then 
+				# 	rm -r $absolute_dir/base;
+				# 	rm -r $absolute_dir/decompiled;
+				# fi
 				cd $path
 			fi
 		else
 			cd $path
 		fi
 	done
- }
-
+}
 
 splitAPKs()
 {		
@@ -99,10 +97,20 @@ splitAPKs()
 	done
 }
 
-python3 -c "from db.database_utils import clear_database; clear_database()";
+checkResultsDirectory(){
+	if [ ! -d "$resultsPath" ]; then
+		mkdir -p "$resultsPath"
+		if [  ! -d "$resultsPath" ]; then
+			echo "Error creating the Results directory."
+			exit 1
+		fi
+	fi 
+}
 
 splitAPKs
 apktoolFunction
+
+checkResultsDirectory
 
 python3 utils/collect_data.py;
 

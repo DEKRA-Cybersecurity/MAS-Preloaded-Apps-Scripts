@@ -54,7 +54,7 @@ def check(wdir, apk, apk_hash, package_name):
         database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
         verdict = 'Needs Review'
     else:
-        database_utils.update_values("Report", "PLATFORM_3", "Pass", "HASH", apk_hash)
+        database_utils.update_values("Report", "PLATFORM_3", "PASS", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
 
     print('PLATFORM-3 successfully tested.')

@@ -25,13 +25,13 @@ def check(wdir, apk, apk_hash, package_name):
             output = subprocess.check_output(cmd, shell=True)
             if output.decode("utf-8").rstrip("\n") == "PASS":
                 database_utils.update_values(
-                    "Report", "NETWORK_1", "Pass", "HASH", apk_hash)
+                    "Report", "NETWORK_1", "PASS", "HASH", apk_hash)
                 database_utils.update_values(
                     "Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
                 verdict = 'PASS'
             else:
                 database_utils.update_values(
-                    "Report", "NETWORK_1", "Fail", "HASH", apk_hash)
+                    "Report", "NETWORK_1", "FAIL", "HASH", apk_hash)
                 database_utils.update_values(
                     "Total_Fail_Counts", "NETWORK_1", 1, "HASH", apk_hash)
         except:
@@ -42,7 +42,7 @@ def check(wdir, apk, apk_hash, package_name):
 
     else:
         database_utils.update_values(
-            "Report", "NETWORK_1", "Pass", "HASH", apk_hash)
+            "Report", "NETWORK_1", "PASS", "HASH", apk_hash)
         database_utils.update_values(
             "Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
         verdict = 'PASS'

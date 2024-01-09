@@ -7,6 +7,7 @@ from openpyxl import Workbook
 from settings import RULES_SEMGREP_PATH
 import re
 import db.database_utils as database_utils
+from utils.auxiliar_functions import get_version_name, dekra_script_version
 
 def scan_with_semgrep(target_path, rules_path):
     final_path = os.path.join(target_path, 'decompiled/sources/')
@@ -41,11 +42,14 @@ def extract_tc(tc_text):
     tc = match.group(1)
     return tc
 
-def write_to_database(app_results, apk_hash, package_name):
+def write_to_database(app_results, apk_hash, package_name, version_name, script_version):
     
     res_app = {
         "HASH" : apk_hash, 
         "APP_NAME" : package_name, 
+        "VERSION_NAME" : version_name,
+        "SEMGREP" : True,
+        "SCRIPT_VERSION" : script_version,
         "CODE-1" : "N/A", 
         "CODE-2": "PASS", 
         "CRYPTO-1" : "PASS", 
@@ -56,7 +60,7 @@ def write_to_database(app_results, apk_hash, package_name):
         "PLATFORM-2" : "N/A", 
         "PLATFORM-3" : "PASS", 
         "STORAGE-2" : "PASS",
-        "SEMGREP" : True
+        
     }
 
     for app_name, category_results in app_results.items():
@@ -103,6 +107,8 @@ def semgrep_scan(wdir, apk_hash, package_name):
         app_results[app_name] = category_results
 
     if app_results:
-        write_to_database(app_results, apk_hash, package_name)
+        version_name = get_version_name(wdir)
+        script_version = dekra_script_version()
+        write_to_database(app_results, apk_hash, package_name, version_name, script_version)
     else:
         print("No findings detected across all apps.")

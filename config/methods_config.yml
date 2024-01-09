@@ -16,7 +16,7 @@ tests:
   storage:
     - storage_2
 semgrep:
-  use: True
+  use: False
 permissions:
   android.permission.INSTALL_PACKAGES:
     weight: 100

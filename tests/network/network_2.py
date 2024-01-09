@@ -61,7 +61,7 @@ def check(wdir, apk, apk_hash, package_name):
         verdict = 'Needs Review'
     else:
         database_utils.update_values(
-            "Report", "NETWORK_2", "Pass", "HASH", apk_hash)
+            "Report", "NETWORK_2", "PASS", "HASH", apk_hash)
         database_utils.update_values(
             "Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
 

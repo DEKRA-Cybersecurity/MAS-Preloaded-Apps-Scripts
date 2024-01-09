@@ -10,12 +10,14 @@ def check(wdir, apk, apk_hash, package_name):
     with open(wdir+'/report_'+apk+'.txt', 'a+') as f:
 
         if debug_info == 'No relevant results':
-            database_utils.update_values("Report", "CODE_2", "Pass", "HASH", apk_hash)
+            database_utils.update_values("Report", "CODE_2", "PASS", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "CODE_2", 0, "HASH", apk_hash)
             verdict = 'PASS'
             
         else:
-            database_utils.update_values("Report", "CODE_2", "Fail", "HASH", apk_hash)
+            match_line = debug_info[0].decode().strip().split(':', 1)[0]
+            database_utils.insert_new_dekra_finding(apk_hash, package_name, "CODE", "CODE-2", "{wdir}/base/AndroidManifest.xml", match_line)
+            database_utils.update_values("Report", "CODE_2", "FAIL", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "CODE_2", 1, "HASH", apk_hash)
 
         print('CODE-2 successfully tested.')

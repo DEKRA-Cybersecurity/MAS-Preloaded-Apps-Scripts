@@ -12,21 +12,35 @@ def check(wdir, apk, apk_hash, package_name):
     vuln_algo = ["\"AES/CBC/PKCS5Padding\"", "\"DES/CBC/PKCS5Padding\"", "\".*/ECB/.*\"", "\"^(TLS).*-CBC-.*\""]
 
     for i in vuln_algo:
-        cmd = f"grep -rlnwz -e {i} {wdir}/decompiled | wc -l"
+        cmd = f"grep -rnw -e {i} {wdir}/decompiled"
+        set_matches = set()
         try:
             output = subprocess.check_output(cmd, shell=True).splitlines()
-            if int(output[0]) > 0:
-                total_matches += int(output[0])
+            if len(output) > 0:
+                for match in output:
+                    match_str = match.decode()
+                    try:
+                        if '.java' in match_str:
+                            match_file = match_str.split(":")[0]
+                            match_line = match_str.split(":")[1] 
+                            set_matches.add(match_file)
+                            database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-3", match_file, match_line)
+                        else:
+                            set_matches.add(match_str)
+                            database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-3", match_str, '-')
+                    except:
+                        print('[ERROR] It was not possible to get match_file or match_line')
+            total_matches += len(set_matches)
         except:
             ct = datetime.datetime.now()
             database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-3", f"grep command failed for {i}")
             pass #No output
 
     if total_matches > 0:
-        database_utils.update_values("Report", "CRYPTO_3", "Fail", "HASH", apk_hash)
+        database_utils.update_values("Report", "CRYPTO_3", "FAIL", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "CRYPTO_3", total_matches, "HASH", apk_hash)
     else:
-        database_utils.update_values("Report", "CRYPTO_3", "Pass", "HASH", apk_hash)
+        database_utils.update_values("Report", "CRYPTO_3", "PASS", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "CRYPTO_3", 0, "HASH", apk_hash)
         verdict = 'PASS'
 

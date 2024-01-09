@@ -27,6 +27,17 @@ def first_execution():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE DEKRA_FINDINGS (
+            HASH VARCHAR(255),
+            APP_NAME VARCHAR(255),
+            CATEGORY VARCHAR(255),
+            CHECK_ID VARCHAR(255),
+            PATH VARCHAR(255),
+            LINE VARCHAR(255)
+        )
+    ''')
+
 
     cursor.execute('''
         CREATE TABLE HTTP_URLS (
@@ -38,7 +49,9 @@ def first_execution():
         CREATE TABLE Report (
             HASH VARCHAR(255) PRIMARY KEY,
             APP_NAME VARCHAR(255),
+            VERSION_NAME VARCHAR(255),
             SEMGREP BOOLEAN,
+            SCRIPT_VERSION VARCHAR(255),
             CODE_1 VARCHAR(255),
             CODE_2 VARCHAR(255),
             CRYPTO_1 VARCHAR(255),
@@ -173,7 +186,7 @@ def insert_new_report(report_data):
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = """INSERT INTO Report (HASH, APP_NAME, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2, SEMGREP) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
     try:    
         cursor.execute(query, tuple(report_data))
@@ -183,15 +196,32 @@ def insert_new_report(report_data):
         print(f'FAIL: {e}')
         return "failed"
 
-def insert_values_report(apk_hash, app_name, semgrep):
+def insert_new_dekra_finding(apk_hash, app_name, category, check_id, path, line):
+
+    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE automated_MASA')
+    
+    query = """INSERT INTO DEKRA_FINDINGS (HASH, APP_NAME, CATEGORY, CHECK_ID, PATH, LINE) VALUES (%s, %s, %s, %s, %s, %s)"""
+    
+    try:    
+        cursor.execute(query, (apk_hash, app_name, category, check_id, path, line, ))
+        cnx.commit()
+        return "success"
+    except Exception as e:
+        print(f'FAIL: {e}')
+        return "failed"
+
+
+def insert_values_report(apk_hash, app_name, version_name, semgrep, script_version):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = """INSERT INTO Report (HASH, APP_NAME, SEMGREP) VALUES (%s, %s, %s)"""
+    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION) VALUES (%s, %s, %s, %s, %s)"""
     
     try:    
-        cursor.execute(query, (apk_hash, app_name, semgrep))
+        cursor.execute(query, (apk_hash, app_name, version_name, semgrep, script_version))
         cnx.commit()
         return "success"
     except:
@@ -341,6 +371,7 @@ def clear_database():
     query_Total_Fail_Counts = '''DELETE FROM Total_Fail_Counts'''
     query_Logging = '''DELETE FROM Logging'''
     query_Semgrep = '''DELETE FROM SEMGREP_FINDINGS'''
+    query_Dekra = '''DELETE FROM DEKRA_FINDINGS'''
 
     try:    
         cursor.execute(query_Report)
@@ -348,6 +379,7 @@ def clear_database():
         cursor.execute(query_Total_Fail_Counts)
         cursor.execute(query_Logging)
         cursor.execute(query_Semgrep)
+        cursor.execute(query_Dekra)
         cnx.commit()
     except:
         print("Failed")

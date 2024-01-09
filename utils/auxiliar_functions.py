@@ -6,7 +6,9 @@ import base64
 import yaml
 import importlib
 import utils.formula as formula
-
+import xml.etree.ElementTree as ET
+import os
+import re
 
 def check_signature(wdir, apk, apk_hash):
     '''
@@ -23,15 +25,13 @@ def check_signature(wdir, apk, apk_hash):
             apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
         return "Invalid"
 
-
 def check_debuggable(wdir, apk_hash):
     '''
     Check if the application uses android:debuggable="true" in AndroidManifest.xml file
     '''
-    cmd = f"cat {wdir}/base/AndroidManifest.xml | egrep -iE 'android:debuggable=\"true\"'"
+    cmd = f"grep -n -iE 'android:debuggable=\"true\"' {wdir}/base/AndroidManifest.xml"
     try:
-        output = [i.decode("utf-8")
-                  for i in subprocess.check_output(cmd, shell=True).splitlines()]
+        output = subprocess.check_output(cmd, shell=True).splitlines()
     except subprocess.CalledProcessError as e:
         ct = datetime.datetime.now()
         if e.returncode == 2:
@@ -42,7 +42,6 @@ def check_debuggable(wdir, apk_hash):
             output = "No relevant results"
 
     return output
-
 
 def check_package_name(wdir, name):
     '''
@@ -61,7 +60,6 @@ def check_package_name(wdir, name):
 
     return package
 
-
 def check_hash_apk(wdir):
     '''
     Prints the application's hash - sha256
@@ -71,7 +69,6 @@ def check_hash_apk(wdir):
         cmd, shell=True).decode("utf-8").replace("\n", "")
 
     return output
-
 
 def get_suid_from_manifest(wdir):
     cmd_get_suid = f'cat {wdir}/base/AndroidManifest.xml | grep -Po "(?<=android:sharedUserId=)\\"[^\\"]+\\"" | sed \'s/\\"//g\''
@@ -84,7 +81,6 @@ def get_suid_from_manifest(wdir):
         out_suid_string = ""  # No tiene SUID
 
     return out_suid_string
-
 
 def check_network_applies(wdir, apk_hash, internet):
 
@@ -134,7 +130,9 @@ def check_network_applies(wdir, apk_hash, internet):
 def check_app(wdir, apk, apk_hash, package_name, internet, semgrep):
 
     print("Starting scanning process...")
-    database_utils.insert_values_report(apk_hash, package_name, semgrep)
+    version_name = get_version_name(wdir)
+    script_version = dekra_script_version()
+    database_utils.insert_values_report(apk_hash, package_name, version_name, semgrep, script_version)
     database_utils.insert_values_total_fail_count(apk_hash)
 
     with open('config/methods_config.yml') as f:
@@ -149,7 +147,6 @@ def check_app(wdir, apk, apk_hash, package_name, internet, semgrep):
     load_and_execute_methods(config['tests'], all_params, applies)
 
     formula.extract_and_store_permissions(apk_hash, package_name, wdir)
-
 
 def load_and_execute_methods(config, all_params, applies):
     for category, tests in config.items():
@@ -180,4 +177,19 @@ def dekra_script_version():
     version = config.get("version", {})
 
     return str(version)
-    
+
+def get_version_name(wdir):
+    try:
+        with open(os.path.join(wdir + '/base/AndroidManifest.xml'), 'r') as file:
+            content = file.read()
+
+            # Utilizar una expresión regular para encontrar android:versionName
+            match = re.search(r'android:versionName\s*=\s*"([^"]+)"', content)
+
+            if match:
+                return match.group(1)
+            else:
+                return ''
+
+    except Exception as e:
+        return ''

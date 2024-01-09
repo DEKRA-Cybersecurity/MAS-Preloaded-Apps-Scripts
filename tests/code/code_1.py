@@ -11,12 +11,12 @@ def check(wdir, apk, apk_hash, package_name):
                 output_sign_count += 1
                 
         if output_sign_count >= 1:
-            database_utils.update_values("Report", "CODE_1", "Pass", "HASH", apk_hash)
+            database_utils.update_values("Report", "CODE_1", "PASS", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "CODE_1", 0, "HASH", apk_hash)
             verdict = 'PASS'
 
         else:
-            database_utils.update_values("Report", "CODE_1", "Fail", "HASH", apk_hash)
+            database_utils.update_values("Report", "CODE_1", "FAIL", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "CODE_1", 0, "HASH", apk_hash)
 
     print('CODE-1 successfully tested.')

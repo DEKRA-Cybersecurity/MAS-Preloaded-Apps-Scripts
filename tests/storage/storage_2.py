@@ -9,11 +9,14 @@ def check(wdir, apk, apk_hash, package_name):
     If it is not found, it is a PASS
     '''
     output_write_external = 0
-    cmd = f'cat {wdir}/base/AndroidManifest.xml | grep WRITE_EXTERNAL_STORAGE'
+    cmd = f"grep -n -iE WRITE_EXTERNAL_STORAGE {wdir}/base/AndroidManifest.xml"
 
     try:
-        out = subprocess.check_output(cmd, shell=True).splitlines()
-        output_write_external += 1   
+        output = subprocess.check_output(cmd, shell=True).splitlines()
+        if output:
+            output_write_external += 1   
+            match_line = output[0].decode().strip().split(':', 1)[0]
+            database_utils.insert_new_dekra_finding(apk_hash, package_name, "STORAGE", "STORAGE-2", wdir + "/base/AndroidManifest.xml", match_line)
     except subprocess.CalledProcessError as e:
         ct = datetime.datetime.now()
         if e.returncode == 1: #permission not found
@@ -30,27 +33,41 @@ def check(wdir, apk, apk_hash, package_name):
         storage_functions = ["getExternalStorageDirectory", "getExternalFilesDir"]
 
         for i in storage_functions:
-            cmd = f"grep -rlnwz -E {i} {wdir}/decompiled | wc -l"
+            cmd = f"grep -rnw -E {i} {wdir}/decompiled"
+            set_matches = set()
             try:
                 output = subprocess.check_output(cmd, shell=True).splitlines()
-                if int(output[0]) > 0:
-                    total_matches += int(output[0]) 
+                if len(output) > 0:
+                    for match in output:
+                        match_str = match.decode()
+                        try:
+                            if '.java' in match_str:
+                                match_file = match_str.split(":")[0]
+                                match_line = match_str.split(":")[1] 
+                                set_matches.add(match_file)
+                                database_utils.insert_new_dekra_finding(apk_hash, package_name, "STORAGE", "STORAGE-2", match_file, match_line)             
+                            else:             
+                                set_matches.add(match_str)
+                                database_utils.insert_new_dekra_finding(apk_hash, package_name, "STORAGE", "STORAGE-2", match_str, '-')
+                        except:
+                            print('[ERROR] It was not possible to get match_file or match_line')
+                total_matches += len(set_matches)
             except:
                 ct = datetime.datetime.now()
                 database_utils.insert_values_logging(apk_hash, ct, "STORAGE-2", f"grep command failed for {i}")
                 pass #No output
                 
         if total_matches > 0:
-            database_utils.update_values("Report", "STORAGE_2", "Fail", "HASH", apk_hash)
+            database_utils.update_values("Report", "STORAGE_2", "FAIL", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "STORAGE_2", total_matches, "HASH", apk_hash)
 
         else:
-            database_utils.update_values("Report", "STORAGE_2", "Pass", "HASH", apk_hash) #Manual check is advised, no matches
+            database_utils.update_values("Report", "STORAGE_2", "PASS", "HASH", apk_hash) #Manual check is advised, no matches
             database_utils.update_values("Total_Fail_Counts", "STORAGE_2", total_matches, "HASH", apk_hash)
             verdict = 'PASS'
 
     elif output_write_external == 0:
-        database_utils.update_values("Report", "STORAGE_2", "Pass", "HASH", apk_hash)
+        database_utils.update_values("Report", "STORAGE_2", "PASS", "HASH", apk_hash)
         database_utils.update_values("Total_Fail_Counts", "STORAGE_2", total_matches, "HASH", apk_hash)
         verdict = 'PASS'
 

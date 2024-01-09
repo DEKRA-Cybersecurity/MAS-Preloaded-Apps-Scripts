@@ -54,6 +54,8 @@ In order to run the script and get the results, you will need to use additional 
  - JADX: Open source decompiling tool used to convert APK (Android Package) files into Java source code.
  - APKSIGNER: Used to confirm that the APK signature will be verified correctly on all versions of the Android platform supported by that APK.
  - TESTSSL: Identify and report known vulnerabilities in the SSL/TLS configuration. This may include detection of weak configurations, support for outdated protocol versions, and other security issues.
+ - SEMGREP: Open-source static analysis tool designed to identify and locate code patterns in source code. Developed to enhance and streamline the process of code review and security analysis, Semgrep employs a pattern-based approach to scan codebases for potential issues, bugs, or security vulnerabilities.
+ Test cases CODE-2, CRYPTO-1, NETWORK-2, PLATFORM-3 and STORAGE-2 can be executed using semgrep and the rules developed by OWASP. To do so, access the configuration file located at config/methods_config.yaml and set the value of semgrep tag to True.
 
 ## Adding new test cases
 In case you want to add new test cases, you have to follow the next steps:
