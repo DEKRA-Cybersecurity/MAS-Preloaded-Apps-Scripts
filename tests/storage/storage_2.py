@@ -18,12 +18,16 @@ def check(wdir, apk, apk_hash, package_name):
             match_line = output[0].decode().strip().split(':', 1)[0]
             database_utils.insert_new_dekra_finding(apk_hash, package_name, "STORAGE", "STORAGE-2", wdir + "/base/AndroidManifest.xml", match_line)
     except subprocess.CalledProcessError as e:
-        ct = datetime.datetime.now()
-        if e.returncode == 1: #permission not found
-            pass
+        if e.returncode == 1:
+            pass 
         else:
+            ct = datetime.datetime.now()
             database_utils.insert_values_logging(apk_hash, ct, "STORAGE-2", "grep for WRITE_EXTERNAL_STORAGE permission failed. File not found")
             pass
+    except:
+        ct = datetime.datetime.now()
+        database_utils.insert_values_logging(apk_hash, ct, "STORAGE-2", "grep for WRITE_EXTERNAL_STORAGE permission failed. File not found")
+        pass #No output
     
     total_matches = 0
     verdict = 'FAIL'
@@ -52,6 +56,13 @@ def check(wdir, apk, apk_hash, package_name):
                         except:
                             print('[ERROR] It was not possible to get match_file or match_line')
                 total_matches += len(set_matches)
+            except subprocess.CalledProcessError as e:
+                if e.returncode == 1:
+                    pass 
+                else:
+                    ct = datetime.datetime.now()
+                    database_utils.insert_values_logging(apk_hash, ct, "STORAGE-2", f"grep command failed for {i}")
+                    pass
             except:
                 ct = datetime.datetime.now()
                 database_utils.insert_values_logging(apk_hash, ct, "STORAGE-2", f"grep command failed for {i}")

@@ -15,17 +15,33 @@ def check(wdir, apk, apk_hash, package_name):
         output = subprocess.check_output(cmd, shell=True).strip()
         if int(output) > 0:
             net_config = True
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            net_config = False
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(
+                apk_hash, ct, "NETWORK-3", "Network security config file grep error")
     except:
         net_config = False
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(
             apk_hash, ct, "NETWORK-3", "Network security config file grep error")
+        pass
 
     cmd_get_target_sdk = f'cat {wdir}/base/AndroidManifest.xml | grep -Po \"(?<=android:targetSdkVersion=)\\"[^\\"]+\\"\" | sed \'s/\"//g\''
     try:
         output = subprocess.check_output(cmd_get_target_sdk, shell=True).splitlines()
         if int(int(output[0])) < 24:
             low_target_Sdk = True
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            low_target_Sdk = False
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "NETWORK-3", "Target sdk grep error")
     except:
         low_target_Sdk = False
         ct = datetime.datetime.now()
@@ -36,6 +52,14 @@ def check(wdir, apk, apk_hash, package_name):
         output = subprocess.check_output(cmd_check_hostnameverifier, shell=True).splitlines()
         if int(output[0]) > 0:
             total_matches += 1 
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(
+                apk_hash, ct, "NETWORK-3", "hostname verifier functions grep error or not found")
+            pass  # No output
     except:
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(

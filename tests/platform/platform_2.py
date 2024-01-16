@@ -42,9 +42,16 @@ def check(wdir, apk, apk_hash, package_name):
                         database_utils.insert_new_dekra_finding(apk_hash, package_name, "PLATFORM", "PLATFORM-2", match_str, '-')
                 except:
                     print('[ERROR] It was not possible to get match_file or match_line')
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", f"grep failed  for {regex_1}")
+            pass
     except:
         ct = datetime.datetime.now()
-        database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", "grep failed  for {i}")
+        database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", f"grep failed  for {regex_1}")
         pass #No output
 
     cmd = f"grep -rlnwz -E {regex_2} {wdir}/decompiled/sources"
@@ -58,9 +65,16 @@ def check(wdir, apk, apk_hash, package_name):
                    database_utils.insert_new_dekra_finding(apk_hash, package_name, "PLATFORM", "PLATFORM-2", match_str, '-')
                 except:
                     print('[ERROR] It was not possible to get match_str')
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", f"grep failed  for {regex_2}")
+            pass
     except:
         ct = datetime.datetime.now()
-        database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", "grep failed  for {i}")
+        database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", f"grep failed  for {regex_2}")
         pass #No output
             
     if total_matches > 0:

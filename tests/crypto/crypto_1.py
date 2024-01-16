@@ -24,6 +24,13 @@ def check(wdir, apk, apk_hash, package_name):
             for match in output:
                 match_file = match.decode()
                 database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-1", match_file, '-')             
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_1}")
+            pass #No output
     except:
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_1}")
@@ -38,6 +45,13 @@ def check(wdir, apk, apk_hash, package_name):
                 match_file = match.decode().split(":")[0]
                 match_line = match.decode().split(":")[1] 
                 database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-1", match_file, match_line)             
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_2}")
+            pass #No output
     except:
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_2}")

@@ -31,6 +31,14 @@ def check(wdir, apk, apk_hash, package_name):
                         cmd, shell=True).splitlines()
                     if int(output[0]) > 0:
                         total_matches += 1
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == 1:
+                        pass 
+                    else:
+                        ct = datetime.datetime.now()
+                        database_utils.insert_values_logging(
+                            apk_hash, ct, "NETWORK-2", "Command failed.")
+                        pass  # No output
                 except:
                     ct = datetime.datetime.now()
                     database_utils.insert_values_logging(

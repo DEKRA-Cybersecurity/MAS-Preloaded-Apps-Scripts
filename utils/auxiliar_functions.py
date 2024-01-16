@@ -19,10 +19,16 @@ def check_signature(wdir, apk, apk_hash):
         output = [i.decode("utf-8")
                   for i in subprocess.check_output(cmd, shell=True).splitlines()]
         return output
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            pass 
+        else:
+            ct = datetime.datetime.now()
+            database_utils.insert_values_logging(apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
+            return "Invalid"
     except:
         ct = datetime.datetime.now()
-        database_utils.insert_values_logging(
-            apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
+        database_utils.insert_values_logging(apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
         return "Invalid"
 
 def check_debuggable(wdir, apk_hash):

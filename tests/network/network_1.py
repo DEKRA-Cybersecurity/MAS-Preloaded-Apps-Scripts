@@ -34,6 +34,14 @@ def check(wdir, apk, apk_hash, package_name):
                     "Report", "NETWORK_1", "FAIL", "HASH", apk_hash)
                 database_utils.update_values(
                     "Total_Fail_Counts", "NETWORK_1", 1, "HASH", apk_hash)
+        except subprocess.CalledProcessError as e:
+            if e.returncode == 1:
+                pass 
+            else:
+                ct = datetime.datetime.now()
+                database_utils.insert_values_logging(
+                    apk_hash, ct, "NETWORK-1", "Check redirects script failed")
+                pass
         except:
             ct = datetime.datetime.now()
             database_utils.insert_values_logging(
