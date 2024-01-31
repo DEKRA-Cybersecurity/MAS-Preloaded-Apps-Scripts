@@ -64,6 +64,9 @@ def check_package_name(wdir, name):
     else:
         package = output
 
+    if package.endswith('<') or package.endswith('>') or package.endswith('/'):
+        package =  package[:-1] 
+
     return package
 
 def check_hash_apk(wdir):

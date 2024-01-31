@@ -6,6 +6,7 @@ def check(wdir, apk, apk_hash, package_name):
     with open(wdir+'/report_'+apk+'.txt', 'a+') as f:
         output_sign_count = 0
         signature_info = check_signature(wdir, apk, apk_hash)
+
         for i in signature_info:
             if "v2): true" in i or "v3): true" in i:
                 output_sign_count += 1

@@ -38,13 +38,6 @@ def first_execution():
         )
     ''')
 
-
-    cursor.execute('''
-        CREATE TABLE HTTP_URLS (
-            URL VARCHAR(255) PRIMARY KEY
-        )
-    ''')
-
     cursor.execute('''
         CREATE TABLE Report (
             HASH VARCHAR(255) PRIMARY KEY,
@@ -89,15 +82,6 @@ def first_execution():
             TESTCASE VARCHAR(255),
             ERROR VARCHAR(255),
             PRIMARY KEY (id)
-        )
-    ''')
-
-    cursor.execute('''
-        CREATE TABLE Total_Counts (
-            HASH VARCHAR(255) PRIMARY KEY,
-            Fail INT(10),
-            Pass INT(10),
-            Needs_Review INT(10)
         )
     ''')
 

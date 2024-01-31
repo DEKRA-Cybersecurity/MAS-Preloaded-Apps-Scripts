@@ -42,11 +42,27 @@ With the applications already stored in `/apks` and the database tables created,
 ```
 ./automate_apps_updated
 ```
-As a result of the analysis, an excel file called **Preload_Analysis.xlsx**  will be provided, which will be located inside the `/apks` folder.
+As a result of the analysis, an excel file called **Preload_Analysis.xlsx**  will be provided, which will be located inside the `/apks/Results/YYYYMMdd` folder.
 In case you want to delete all the data in the database, you will need to execute the following command:
 ```
 python3 -c "from db.database_utils import clear_database; clear_database()"
 ```
+
+## Database structure
+`TestSSL_URL:`
+This table stores the URLs that have already been scanned in NETWORK-2 test case and the result.
+`SEMGREP_FINDINGS:`  
+This table stores all the matches found in the test cases when semgrep implementation is used. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file.  
+`DEKRA_FINDINGS:`
+This table stores all the matches found in the test cases when DEKRA implementation is used. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file. In some test cases where multiline match is required, it is not possible to get the line number of the match.  
+`Report:`
+This table stores the result of the test cases (PASS, FAIL or Need Review), information about the scan and information of the application. The application information stored is the hash, app_name and version_name to identify it. Regarding the scan information, it stores if semgrep option is enabled or not and the version of the script used in the analysis.  
+`Total_Fail_Counts:`
+This table stores the hash of the application along with the number of matches found for each test case.  
+`Logging:`
+This table stores information about events that occurred during the execution of the script. The hash of the application and the time of the event is also stored, as well as the error message.  
+`Permissions:`
+This table stores the Android permissions required by the application.
 
 ## Additional tools
 In order to run the script and get the results, you will need to use additional tools found in the `/tools` directory, which are:

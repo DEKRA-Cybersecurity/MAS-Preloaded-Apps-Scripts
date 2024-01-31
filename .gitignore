@@ -13,7 +13,7 @@ myenv/
 # Unit tests
 
 unit_tests/reference_apk/*.txt
-unit_tests/reference_apk/Calendar/*.txt
-unit_tests/reference_apk/Calendar/base
-unit_tests/reference_apk/Calendar/decompiled
-unit_tests/reference_apk/Calendar/{}
+unit_tests/reference_apk/Bluetooth/*.txt
+unit_tests/reference_apk/Bluetooth/base
+unit_tests/reference_apk/Bluetooth/decompiled
+unit_tests/reference_apk/Bluetooth/{}
