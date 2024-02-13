@@ -42,7 +42,7 @@ def extract_tc(tc_text):
     tc = match.group(1)
     return tc
 
-def write_to_database(app_results, apk_hash, package_name, version_name, script_version):
+def write_to_database(app_results, apk_hash, package_name, version_name, script_version, actual_timestamp):
     
     res_app = {
         "HASH" : apk_hash, 
@@ -60,7 +60,7 @@ def write_to_database(app_results, apk_hash, package_name, version_name, script_
         "PLATFORM-2" : "N/A", 
         "PLATFORM-3" : "PASS", 
         "STORAGE-2" : "PASS",
-        
+        "TIMESTAMP" : actual_timestamp
     }
 
     for app_name, category_results in app_results.items():
@@ -98,7 +98,7 @@ def analyze_app(app_dir):
 
     return app_name, category_results
 
-def semgrep_scan(wdir, apk_hash, package_name):
+def semgrep_scan(wdir, apk_hash, package_name, actual_timestamp):
 
     app_results = {}
 
@@ -109,6 +109,6 @@ def semgrep_scan(wdir, apk_hash, package_name):
     if app_results:
         version_name = get_version_name(wdir)
         script_version = dekra_script_version()
-        write_to_database(app_results, apk_hash, package_name, version_name, script_version)
+        write_to_database(app_results, apk_hash, package_name, version_name, script_version, actual_timestamp)
     else:
         print("No findings detected across all apps.")

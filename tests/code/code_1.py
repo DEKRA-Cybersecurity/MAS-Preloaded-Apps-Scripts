@@ -18,7 +18,7 @@ def check(wdir, apk, apk_hash, package_name):
 
         else:
             database_utils.update_values("Report", "CODE_1", "FAIL", "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "CODE_1", 0, "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "CODE_1", 1, "HASH", apk_hash)
 
     print('CODE-1 successfully tested.')
 

@@ -35,7 +35,7 @@ def check_debuggable(wdir, apk_hash):
     '''
     Check if the application uses android:debuggable="true" in AndroidManifest.xml file
     '''
-    cmd = f"grep -n -iE 'android:debuggable=\"true\"' {wdir}/base/AndroidManifest.xml"
+    cmd = f"grep -n --exclude='*.dex' -iE 'android:debuggable=\"true\"' {wdir}/base/AndroidManifest.xml"
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
     except subprocess.CalledProcessError as e:
@@ -104,44 +104,32 @@ def check_network_applies(wdir, apk_hash, internet):
         if content == "1":
             applies = True
         elif content == "0":
-            database_utils.update_values(
-                "Report", "NETWORK_1", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Report", "NETWORK_2", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Report", "NETWORK_3", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
 
     except:
         if internet == "1":
             applies = True
         else:
-            database_utils.update_values(
-                "Report", "NETWORK_1", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Report", "NETWORK_2", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Report", "NETWORK_3", "NA", "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
-            database_utils.update_values(
-                "Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
 
     return applies
 
-def check_app(wdir, apk, apk_hash, package_name, internet, semgrep):
+def check_app(wdir, apk, apk_hash, package_name, internet, semgrep, actual_timestamp):
 
     print("Starting scanning process...")
     version_name = get_version_name(wdir)
     script_version = dekra_script_version()
-    database_utils.insert_values_report(apk_hash, package_name, version_name, semgrep, script_version)
+    database_utils.insert_values_report(apk_hash, package_name, version_name, semgrep, script_version, actual_timestamp)
     database_utils.insert_values_total_fail_count(apk_hash)
 
     with open('config/methods_config.yml') as f:
@@ -175,7 +163,7 @@ def use_semgrep():
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    use = bool(config.get("semgrep", {}).get("use"))
+    use = bool(config.get("semgrep", {}))
 
     return use
 
@@ -186,6 +174,14 @@ def dekra_script_version():
     version = config.get("version", {})
 
     return str(version)
+
+def export_csv():
+    with open('config/methods_config.yml') as f:
+        config = yaml.load(f, Loader=yaml.SafeLoader)
+
+    export_csv = bool(config.get("export_csv", {}))
+
+    return export_csv
 
 def get_version_name(wdir):
     try:

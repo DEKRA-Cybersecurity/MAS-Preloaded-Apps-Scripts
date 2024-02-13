@@ -42,9 +42,9 @@ def extract_and_store_permissions(apk_hash, package_name, wdir):
 get_risk returns the risk associated to a permission, if that app holds a "risky" permission.
 '''
 
-def get_m_value(p, tests):
+def get_m_value(p, tests, actual_timestamp):
     total_fails = 0
-    record_apps = database_utils.get_values_permissions()
+    record_apps = database_utils.get_values_permissions(actual_timestamp)
     for rapp in record_apps:
         if p in rapp[2]:
             records = database_utils.get_values("Total_Fail_Counts", "HASH", rapp[0], tests)
@@ -64,22 +64,22 @@ def get_risk(p, permissions):
 '''
 get_value_k returns the number of apps that holds permission p
 '''
-def get_value_k(p):
+def get_value_k(p, actual_timestamp):
     total_apps = 0
-    records = database_utils.get_values_permissions()
+    records = database_utils.get_values_permissions(actual_timestamp)
     for r in records:
         if p in r[2]:
             total_apps += 1
 
     return total_apps
 
-def calculate_formula(Constant1, Constant2, tests):
+def calculate_formula(Constant1, Constant2, tests, actual_timestamp):
     result = 0
     all_permissions = get_all_permissions()
     for p in all_permissions:
         risk = get_risk(p, all_permissions)  # Replace `get_risk(p)` with your specific risk calculation for each p
-        value_k = get_value_k(p)  # Replace `get_value_k(p)` with your specific value K calculation for each p
-        M = get_m_value(p, tests)
+        value_k = get_value_k(p, actual_timestamp)  # Replace `get_value_k(p)` with your specific value K calculation for each p
+        M = get_m_value(p, tests, actual_timestamp)
         term = risk * (1 - ((1 - Constant1) ** value_k) * ((1 - Constant2) ** M))
 
         result += term

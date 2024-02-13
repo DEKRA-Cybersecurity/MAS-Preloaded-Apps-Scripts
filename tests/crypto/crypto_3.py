@@ -12,7 +12,7 @@ def check(wdir, apk, apk_hash, package_name):
     vuln_algo = ["\"AES/CBC/PKCS5Padding\"", "\"DES/CBC/PKCS5Padding\"", "\".*/ECB/.*\"", "\"^(TLS).*-CBC-.*\""]
 
     for i in vuln_algo:
-        cmd = f"grep -rnw -e {i} {wdir}/decompiled"
+        cmd = f"grep -rnw --exclude='*.dex' -e {i} {wdir}/decompiled/sources"
         set_matches = set()
         try:
             output = subprocess.check_output(cmd, shell=True).splitlines()

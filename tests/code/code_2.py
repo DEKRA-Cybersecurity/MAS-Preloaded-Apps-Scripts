@@ -16,7 +16,7 @@ def check(wdir, apk, apk_hash, package_name):
             
         else:
             match_line = debug_info[0].decode().strip().split(':', 1)[0]
-            database_utils.insert_new_dekra_finding(apk_hash, package_name, "CODE", "CODE-2", "{wdir}/base/AndroidManifest.xml", match_line)
+            database_utils.insert_new_dekra_finding(apk_hash, package_name, "CODE", "CODE-2", wdir+"/base/AndroidManifest.xml", match_line)
             database_utils.update_values("Report", "CODE_2", "FAIL", "HASH", apk_hash)
             database_utils.update_values("Total_Fail_Counts", "CODE_2", 1, "HASH", apk_hash)
 

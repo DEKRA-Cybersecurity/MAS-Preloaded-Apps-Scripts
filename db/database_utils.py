@@ -54,7 +54,8 @@ def first_execution():
             NETWORK_3 VARCHAR(255),
             PLATFORM_2 VARCHAR(255),
             PLATFORM_3 VARCHAR(255),
-            STORAGE_2 VARCHAR(255)            
+            STORAGE_2 VARCHAR(255),
+            TIMESTAMP VARCHAR(255)            
         )
     ''')
 
@@ -170,7 +171,7 @@ def insert_new_report(report_data):
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2, TIMESTAMP) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
     try:    
         cursor.execute(query, tuple(report_data))
@@ -196,16 +197,15 @@ def insert_new_dekra_finding(apk_hash, app_name, category, check_id, path, line)
         print(f'FAIL: {e}')
         return "failed"
 
-
-def insert_values_report(apk_hash, app_name, version_name, semgrep, script_version):
+def insert_values_report(apk_hash, app_name, version_name, semgrep, script_version, actual_timestamp):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION) VALUES (%s, %s, %s, %s, %s)"""
+    query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, TIMESTAMP) VALUES (%s, %s, %s, %s, %s, %s)"""
     
     try:    
-        cursor.execute(query, (apk_hash, app_name, version_name, semgrep, script_version))
+        cursor.execute(query, (apk_hash, app_name, version_name, semgrep, script_version, actual_timestamp))
         cnx.commit()
         return "success"
     except:
@@ -253,15 +253,35 @@ def update_values_permissions_add_new_permissions_set(apk_hash, permissions):
     except:
         return "failed"
 
-def unify_suid_permissions():
+def get_scanned_apks(actual_timestamp):
+    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE automated_MASA')
+
+    query = "SELECT count(*) FROM Report WHERE TIMESTAMP = '" + actual_timestamp + "'"
+
+
+    try:
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        # Fetch the result
+        count = cursor.fetchone()[0]
+        
+        return count
+    except:
+        return "failed"
+
+def unify_suid_permissions(actual_timestamp):
     all_perms = ""
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
     query = """SELECT * FROM Permissions"""
-    query_single_app = """SELECT APP_NAME, Permissions FROM Permissions WHERE APP_NAME = %s"""
-    query_all_perms = """SELECT APP_NAME, Permissions, SUID FROM Permissions WHERE SUID = %s"""
+    # query_single_app = """SELECT APP_NAME, Permissions FROM Permissions WHERE APP_NAME = %s"""
+    query_single_app = """SELECT p.APP_NAME, p.Permissions FROM Permissions p INNER JOIN Report r ON p.APP_NAME = r.APP_NAME WHERE p.APP_NAME = %s AND r.TIMESTAMP = %s"""
+    # query_all_perms = """SELECT APP_NAME, Permissions, SUID FROM Permissions WHERE SUID = %s"""
+    query_all_perms = """SELECT p.APP_NAME, p.Permissions, p.SUID FROM Permissions p INNER JOIN Report r ON p.APP_NAME = r.APP_NAME WHERE SUID = %s AND r.TIMESTAMP = %s"""
 
     try:
         cursor = cnx.cursor(buffered=False)
@@ -271,10 +291,10 @@ def unify_suid_permissions():
         for row in records:
             if row[3] is not None: #if SUID is set 
                 if row[1] != row[3]: #if the package name is not the same as SUID, then append permissions
-                    cursor.execute(query_single_app, (row[1],))
+                    cursor.execute(query_single_app, (row[1], actual_timestamp, ))
                     current_perm = cursor.fetchall()[0][1]
 
-                    cursor.execute(query_all_perms, (row[3],))
+                    cursor.execute(query_all_perms, (row[3], actual_timestamp, ))
                     records_perm = cursor.fetchall()
                     for record in records_perm:
                         if record[0] != row[1] and record[1] != "":
@@ -294,12 +314,13 @@ def unify_suid_permissions():
         print("Failed while unifying permissions")
         return "failed"
     
-def get_values_permissions():
+def get_values_permissions(actual_timestamp):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE automated_MASA')
 
-    query = f"""SELECT * FROM Permissions"""
+    query = "SELECT p.* FROM Permissions p INNER JOIN Report r ON p.HASH = r.HASH WHERE r.TIMESTAMP = '" + actual_timestamp + "'"
+
 
     try:
         cursor = cnx.cursor()

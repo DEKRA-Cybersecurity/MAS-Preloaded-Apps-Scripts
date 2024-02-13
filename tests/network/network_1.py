@@ -23,7 +23,8 @@ def check(wdir, apk, apk_hash, package_name):
         try:
             cmd = f'utils/check_network1_redirects.sh {wdir+"/http_net2.txt"}'
             output = subprocess.check_output(cmd, shell=True)
-            if output.decode("utf-8").rstrip("\n") == "PASS":
+            urls_found = output.decode("utf-8").rstrip("\n")
+            if urls_found == "0":
                 database_utils.update_values(
                     "Report", "NETWORK_1", "PASS", "HASH", apk_hash)
                 database_utils.update_values(
@@ -33,7 +34,7 @@ def check(wdir, apk, apk_hash, package_name):
                 database_utils.update_values(
                     "Report", "NETWORK_1", "FAIL", "HASH", apk_hash)
                 database_utils.update_values(
-                    "Total_Fail_Counts", "NETWORK_1", 1, "HASH", apk_hash)
+                    "Total_Fail_Counts", "NETWORK_1", urls_found, "HASH", apk_hash)
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 pass 

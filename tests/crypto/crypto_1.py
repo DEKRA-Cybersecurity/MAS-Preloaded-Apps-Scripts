@@ -13,10 +13,10 @@ def check(wdir, apk, apk_hash, package_name):
     '''
     verdict = 'FAIL'
     total_matches = 0
-    regex_1 = "\"import java(x)?\.(security|crypto).*;(\\n|.)*((final String [a-zA-Z0-9]+[ ]*\=)|(==\\\")|(byte\[\] [a-zA-Z0-9]* = [{]{1}[ ]?[0-9]+)|(SecretKeySpec\(((\{[0-9]+)|(\\\"[a-zA-Z0-9]+\\\"))))\""
+    regex_1 = "\"import java(x)?\.(security|crypto).*;(\\n|.)*((final String [a-zA-Z0-9]+[ ]*\\=)|(==\\\")|(byte\\[\\] [a-zA-Z0-9]* = [{]{1}[ ]?[0-9]+)|(SecretKeySpec\\(((\\{[0-9]+)|(\\\"[a-zA-Z0-9]+\\\"))))\""
     regex_2 = "\"Lcom\/jiolib\/libclasses\/utils\/AesUtil\""
 
-    cmd = f"grep -rlnwz -E {regex_1} {wdir}/decompiled/sources"
+    cmd = f"grep -rlnwz --exclude='*.dex' -E {regex_1} {wdir}/decompiled/sources"
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
         if len(output) > 0:
@@ -29,14 +29,14 @@ def check(wdir, apk, apk_hash, package_name):
             pass 
         else:
             ct = datetime.datetime.now()
-            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_1}")
+            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed due to {wdir}/decompiled/sources does not exists")
             pass #No output
     except:
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_1}")
         pass #No output
 
-    cmd = f"grep -rlnw -E {regex_2} {wdir}/decompiled/sources"
+    cmd = f"grep -rlnws --exclude='*.dex' -E {regex_2} {wdir}/decompiled/sources"
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
         if len(output) > 0:
@@ -50,7 +50,7 @@ def check(wdir, apk, apk_hash, package_name):
             pass 
         else:
             ct = datetime.datetime.now()
-            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed for {regex_2}")
+            database_utils.insert_values_logging(apk_hash, ct, "CRYPTO-1", f"grep command failed due to {wdir}/decompiled/sources does not exists")
             pass #No output
     except:
         ct = datetime.datetime.now()

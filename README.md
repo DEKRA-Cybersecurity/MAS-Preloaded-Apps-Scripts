@@ -5,7 +5,8 @@
 This Python project is designed to perform static analysis of Android Apps to cover 10 MASA test cases (CODE-1, CODE-2, CRYPTO-1, CRYPTO-3, NETWORK-1, NETWORK-2, NETWORK-3, PLATFORM-2, PLATFORM-3 and STORAGE-2). The main script extracts details such as the APK name, version, urls and permissions requested by the application, based on these parameters and the execution of the test cases, it provides a value that indicates the risk score of a set of applications.
 
 The results of the analysis are stored both in a MySQL database distributed in different tables and in an Excel file, which allows easy access and visualization of the data collected. In this excel you can see four tabs which are:
-- Report: It stores the hash and app name of each application as well as the result (PASS, FAIL, INCONCLUSIVE, NA) for each test case.
+- Report: It stores the hash and app name of each application as well as the result (PASS, FAIL, Needs Review, NA) for each test case.
+- Findings: In this sheet it is possible to see for each test case on which file it has matched (some test cases indicate the match line, in other cases it is not possible).
 - Total_Fail_Counts: Indicates for each test case how many matches have been found, it is necessary for the calculation of the formula.
 - Formula: Indicates the value obtained when calculating the risk score.
 - Logging: In case of obtaining failures during the analysis, these will be registered in this table.
@@ -42,7 +43,8 @@ With the applications already stored in `/apks` and the database tables created,
 ```
 ./automate_apps_updated
 ```
-As a result of the analysis, an excel file called **Preload_Analysis.xlsx**  will be provided, which will be located inside the `/apks/Results/YYYYMMdd` folder.
+As a result of the analysis the data obtained will be exported, there are two options CSV or XLXS, to choose the format you must access the configuration file located in the path `/config/methods_config.yml` and give value (True/False) to the variable export_csv. The exported data can be found in the folder **/apks/Results/YYYYYYYYYYMMdd/HHmmss**.
+
 In case you want to delete all the data in the database, you will need to execute the following command:
 ```
 python3 -c "from db.database_utils import clear_database; clear_database()"
@@ -63,6 +65,12 @@ This table stores the hash of the application along with the number of matches f
 This table stores information about events that occurred during the execution of the script. The hash of the application and the time of the event is also stored, as well as the error message.  
 `Permissions:`
 This table stores the Android permissions required by the application.
+
+## Risk Score
+To understand the result of the Risk Score, how its value is obtained, what parameters are taken into account and what formula is used, [read this paper](https://docs.google.com/document/d/1dnjXoHpVL5YmZTqVEC9b9JOfu6EzQiizZAHVAeDoIlo/edit).
+
+**What is the Shared User Id (SUID)?**
+The Shared User Id is a tag found in the AndroidManifest.xml and influences the formula value.
 
 ## Additional tools
 In order to run the script and get the results, you will need to use additional tools found in the `/tools` directory, which are:

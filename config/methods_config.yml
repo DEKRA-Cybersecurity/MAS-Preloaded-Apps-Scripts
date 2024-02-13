@@ -1,4 +1,6 @@
-version: 1.0
+version: 1.1
+semgrep: False
+export_csv: False 
 tests:
   code:
     - code_1
@@ -15,8 +17,6 @@ tests:
     - platform_3
   storage:
     - storage_2
-semgrep:
-  use: False
 permissions:
   android.permission.INSTALL_PACKAGES:
     weight: 100

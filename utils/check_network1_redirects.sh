@@ -30,9 +30,9 @@ done
 #echo $counter_lines
 
 if [ $counter -eq $counter_lines ]; then
-	echo "PASS"
+	echo 0
 else
-	echo "FAIL"
+	echo $counter
 fi
 
 

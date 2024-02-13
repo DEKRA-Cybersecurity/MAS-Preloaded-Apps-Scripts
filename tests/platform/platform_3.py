@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import db.database_utils as database_utils
+import re, os
 
 def check(wdir, apk, apk_hash, package_name):
     '''
@@ -9,49 +10,21 @@ def check(wdir, apk, apk_hash, package_name):
     to filter out those applications that have no custom URL in place.
     '''
     verdict = 'PASS'
-    root = ET.parse(f'{wdir}/base/AndroidManifest.xml').getroot()
-    activity_urls_dict = {}
+    manifest_path = os.path.join(wdir, 'base/AndroidManifest.xml')
+    custom_urls = 0
 
-    for app in root.findall("application"):
-        for activity in app.iter("activity"):
+    with open(manifest_path, 'r') as file:
+        xml_data = file.read()
+        pattern = r'android:scheme="([^"]+)"'
+        scheme_values = re.findall(pattern, xml_data)
 
-            i_filters = [x for x in activity.iter("intent-filter")] 
-            
-            if len(i_filters) > 0:
-
-                custom_urls = []
-
-                for i_filter in i_filters:
-                    for data  in i_filter.iter("data"):
-                        host = ''
-                        path = ''
-                        scheme = ''
-
-                        for x in data.attrib.keys():
-                            
-                            if "host" in x:
-                                host=data.attrib[x]
-                            if "path" in x:
-                                path=data.attrib[x]
-                            
-                            if "scheme" in x:
-                                scheme=data.attrib[x]
-
-                            if scheme != '' and scheme != 'http' and scheme != 'https':
-                                custom_urls.append(f'{scheme}://{host}{path}')
-
-                                
-                custom_urls = list(dict.fromkeys(custom_urls))
-                
-
-                if len(custom_urls) > 0:
-                    for i in activity.attrib.keys():
-                        if "name" in i:
-                            activity_urls_dict[activity.attrib[i]] = custom_urls             
-                                                 
-    if len(activity_urls_dict) > 0:
+        for value in scheme_values:
+            if(value != 'http' and value != 'https' and value != '' and value != None):
+                custom_urls = custom_urls + 1
+                                                
+    if custom_urls > 0:
         database_utils.update_values("Report", "PLATFORM_3", "Needs Review", "HASH", apk_hash)
-        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
+        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", custom_urls, "HASH", apk_hash)
         verdict = 'Needs Review'
     else:
         database_utils.update_values("Report", "PLATFORM_3", "PASS", "HASH", apk_hash)

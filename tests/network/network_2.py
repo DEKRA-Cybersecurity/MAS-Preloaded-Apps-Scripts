@@ -15,63 +15,53 @@ def check(wdir, apk, apk_hash, package_name):
     verdict = 'PASS'
     total_matches = 0
     is_inconclusive = False
-    grep_filter = ["\"((SSLv2).*(deprecated))|((SSLv3).*(deprecated))|((TLS 1).*(deprecated))|((TLS 1.1).*(deprecated))\"",
-                   "\"((TLSv1:)|(TLSv1.1:)).*(-DES-[A-Z0-9]+)\""]
+    grep_filter = "\"((TLSv1:)|(TLSv1.1:)).*(-DES-[A-Z0-9]+)\""
     with open(wdir+'/_filtered_net2.txt') as all_urls:
 
         for url in all_urls:
+            url_total_match = 0
             url_no_breakline = url.rstrip("\n")
-            cmd = f'echo no | {PATH_TESTSSL} -P {url_no_breakline} 2>/dev/null | grep -E {grep_filter[1]} | wc -l'
+            cmd = f'echo no | {PATH_TESTSSL} -P {url_no_breakline} 2>/dev/null | grep -E {grep_filter} | wc -l'
 
-            results = database_utils.get_values(
-                "TestSSL_URLS", "URL", url_no_breakline, None)
+            results = database_utils.get_values("TestSSL_URLS", "URL", url_no_breakline, None)
+            
             if not results:
                 try:
-                    output = subprocess.check_output(
-                        cmd, shell=True).splitlines()
+                    output = subprocess.check_output(cmd, shell=True).splitlines()
                     if int(output[0]) > 0:
                         total_matches += 1
+                        url_total_match = 1
                 except subprocess.CalledProcessError as e:
                     if e.returncode == 1:
                         pass 
                     else:
                         ct = datetime.datetime.now()
-                        database_utils.insert_values_logging(
-                            apk_hash, ct, "NETWORK-2", "Command failed.")
+                        database_utils.insert_values_logging(apk_hash, ct, "NETWORK-2", "Command failed.")
                         pass  # No output
                 except:
                     ct = datetime.datetime.now()
-                    database_utils.insert_values_logging(
-                        apk_hash, ct, "NETWORK-2", "Command failed.")
+                    database_utils.insert_values_logging(apk_hash, ct, "NETWORK-2", "Command failed.")
                     pass  # No output
 
-                if total_matches > 0:
+                if url_total_match > 0:
                     is_inconclusive = True
-                    database_utils.insert_values_testsslURLs(
-                        url_no_breakline, "Needs Review")
+                    database_utils.insert_values_testsslURLs(url_no_breakline, "Needs Review")
                 else:
-                    database_utils.insert_values_testsslURLs(
-                        url_no_breakline, "Pass")
+                    database_utils.insert_values_testsslURLs(url_no_breakline, "Pass")
 
-            else:
-                if results[0][1] == "INCONCLUSIVE":
+            elif not is_inconclusive and results[0][1] == "Needs Review":
                     is_inconclusive = True
-                elif results[0][1] == "PASS":
-                    is_inconclusive = False
+                    total_matches += 1
 
-            total_matches = 0
+            
 
     if is_inconclusive:
-        database_utils.update_values(
-            "Report", "NETWORK_2", "Needs Review", "HASH", apk_hash)
-        database_utils.update_values(
-            "Total_Fail_Counts", "NETWORK_2", total_matches, "HASH", apk_hash)
+        database_utils.update_values("Report", "NETWORK_2", "Needs Review", "HASH", apk_hash)
+        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", total_matches, "HASH", apk_hash)
         verdict = 'Needs Review'
     else:
-        database_utils.update_values(
-            "Report", "NETWORK_2", "PASS", "HASH", apk_hash)
-        database_utils.update_values(
-            "Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
+        database_utils.update_values("Report", "NETWORK_2", "PASS", "HASH", apk_hash)
+        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
 
     print('NETWORK-2 successfully tested.')
 

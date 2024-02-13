@@ -9,7 +9,7 @@ def check(wdir, apk, apk_hash, package_name):
     If it is not found, it is a PASS
     '''
     output_write_external = 0
-    cmd = f"grep -n -iE WRITE_EXTERNAL_STORAGE {wdir}/base/AndroidManifest.xml"
+    cmd = f"grep -n --exclude='*.dex' -iE WRITE_EXTERNAL_STORAGE {wdir}/base/AndroidManifest.xml"
 
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
@@ -37,7 +37,7 @@ def check(wdir, apk, apk_hash, package_name):
         storage_functions = ["getExternalStorageDirectory", "getExternalFilesDir"]
 
         for i in storage_functions:
-            cmd = f"grep -rnw -E {i} {wdir}/decompiled"
+            cmd = f"grep -rnw --exclude='*.dex' -E {i} {wdir}/decompiled/sources"
             set_matches = set()
             try:
                 output = subprocess.check_output(cmd, shell=True).splitlines()

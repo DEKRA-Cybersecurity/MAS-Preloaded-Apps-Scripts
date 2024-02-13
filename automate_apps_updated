@@ -1,6 +1,6 @@
 #!/bin/bash
 
-start=$(date +"%T")
+actual_timestamp=$(date +"%Y%m%d_%H%M%S")
 path=$(pwd)
 delete_files=$1
 apk_path='apks/*'
@@ -12,9 +12,9 @@ fi
 jadxFunction()
 {
 	mkdir $absolute_dir/decompiled;
-	# Ejecuta el jadx
-	"$path/tools/jadx/bin/jadx" -d $absolute_dir/decompiled $absolute_dir/base.apk;
-	#jadx -d $absolute_dir/decompiled $absolute_dir/base.apk;
+
+	python3 $path/utils/decompile_jadx.py $absolute_dir/decompiled $absolute_dir/base.apk $path;
+
 
 	# Estos dos greps se encargan de extraer las URLs dentro del codigo.
 	grep -or -E "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/net2_$stripped.txt
@@ -43,7 +43,7 @@ jadxFunction()
 	    fi
 	fi
 	cd $path
-	python3 main.py $absolute_dir $has_internet;
+	python3 main.py $absolute_dir $has_internet $actual_timestamp;
 	sleep 2
 }
 
@@ -55,10 +55,7 @@ apktoolFunction()
 		mv $absolute_dir/*.apk $absolute_dir/base.apk 2>/dev/null;
 		cd $absolute_dir
 		if [[ $(ls | grep -x base | wc -l) -eq 0 && $(ls | grep -x base.apk | wc -l) -eq 1 && ! -f "apkTool.txt"  ]]; then			
-			"$path/tools/apktool" d $absolute_dir/base.apk 1>/dev/null;
-			if [ $? -ne 0 ]; then
-				"$path/tools/apktool" d -f --no-res $absolute_dir/base.apk;
-			fi
+			python3 $path/utils/decompile_apktool.py $absolute_dir/base.apk $path;
 			touch apkTool.txt
 			jadxFunction
 			if [ $(find $absolute_dir/base -name "*apk" | wc -l) -ne 0 ]; then
@@ -82,20 +79,6 @@ apktoolFunction()
 	done
 }
 
-splitAPKs()
-{		
-	for dir in */
-	do	
-		stripped_dir=$(echo $dir | cut -d "/" -f 1)
-		for f in $(ls $dir | grep "split")
-		do
-			stripped=$(echo $f | sed 's/.apk//g')
-			new_Path=$(echo "$stripped_dir""_$stripped")
-			mkdir $new_Path
-			mv $(pwd)/$dir/$f $new_Path/base.apk; #2>/dev/null;
-		done
-	done
-}
 
 checkResultsDirectory(){
 	if [ ! -d "$resultsPath" ]; then
@@ -107,15 +90,12 @@ checkResultsDirectory(){
 	fi 
 }
 
-splitAPKs
 apktoolFunction
 
 checkResultsDirectory
 
-python3 utils/collect_data.py;
+python3 utils/collect_data.py $actual_timestamp;
 
 find . -name "apkTool.txt" -exec rm {} \;
-
-finish=$(date +"%T")
 
 echo "Analysis successfully executed"
