@@ -16,7 +16,7 @@ def check(wdir, apk, apk_hash, package_name):
     regex_1 = "\"import java(x)?\.(security|crypto).*;(\\n|.)*((final String [a-zA-Z0-9]+[ ]*\\=)|(==\\\")|(byte\\[\\] [a-zA-Z0-9]* = [{]{1}[ ]?[0-9]+)|(SecretKeySpec\\(((\\{[0-9]+)|(\\\"[a-zA-Z0-9]+\\\"))))\""
     regex_2 = "\"Lcom\/jiolib\/libclasses\/utils\/AesUtil\""
 
-    cmd = f"grep -rlnwz --exclude='*.dex' -E {regex_1} {wdir}/decompiled/sources"
+    cmd = f"grep -rlnwzs --exclude='*.dex' -E {regex_1} {wdir}/decompiled/sources"
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
         if len(output) > 0:

@@ -9,13 +9,14 @@ def check(wdir, apk, apk_hash, package_name):
     '''
     verdict = 'FAIL'
     total_matches = 0
-    vuln_algo = ["\"AES/CBC/PKCS5Padding\"", "\"DES/CBC/PKCS5Padding\"", "\".*/ECB/.*\"", "\"^(TLS).*-CBC-.*\""]
-
+    vuln_algo = ["\"AES/CBC/PKCS5Padding\"", "\"DES/CBC/PKCS5Padding\"", "\".*\\/ECB\"", "\"^(TLS).*-CBC-.*\""]
+    
     for i in vuln_algo:
-        cmd = f"grep -rnw --exclude='*.dex' -e {i} {wdir}/decompiled/sources"
-        set_matches = set()
+        cmd = f"grep -rnws --exclude='*.dex' -E {i} {wdir}/decompiled/sources"
+        
         try:
             output = subprocess.check_output(cmd, shell=True).splitlines()
+            
             if len(output) > 0:
                 for match in output:
                     match_str = match.decode()
@@ -23,14 +24,13 @@ def check(wdir, apk, apk_hash, package_name):
                         if '.java' in match_str:
                             match_file = match_str.split(":")[0]
                             match_line = match_str.split(":")[1] 
-                            set_matches.add(match_file)
+                            total_matches += 1
                             database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-3", match_file, match_line)
                         else:
-                            set_matches.add(match_str)
+                            total_matches += 1
                             database_utils.insert_new_dekra_finding(apk_hash, package_name, "CRYPTO", "CRYPTO-3", match_str, '-')
                     except:
                         print('[ERROR] It was not possible to get match_file or match_line')
-            total_matches += len(set_matches)
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 pass 

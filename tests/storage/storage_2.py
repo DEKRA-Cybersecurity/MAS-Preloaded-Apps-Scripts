@@ -37,7 +37,7 @@ def check(wdir, apk, apk_hash, package_name):
         storage_functions = ["getExternalStorageDirectory", "getExternalFilesDir"]
 
         for i in storage_functions:
-            cmd = f"grep -rnw --exclude='*.dex' -E {i} {wdir}/decompiled/sources"
+            cmd = f"grep -rnws --exclude='*.dex' -E {i} {wdir}/decompiled/sources"
             set_matches = set()
             try:
                 output = subprocess.check_output(cmd, shell=True).splitlines()

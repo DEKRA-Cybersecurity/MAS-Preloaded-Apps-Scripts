@@ -47,7 +47,7 @@ def check(wdir, apk, apk_hash, package_name):
         ct = datetime.datetime.now()
         database_utils.insert_values_logging(apk_hash, ct, "NETWORK-3", "Target sdk grep error")
 
-    cmd_check_hostnameverifier = f"grep -rnwz --exclude='*.dex' -E {verifier_check} {wdir}/decompiled/sources | wc -l"
+    cmd_check_hostnameverifier = f"grep -rnwzs --exclude='*.dex' -E {verifier_check} {wdir}/decompiled/sources | wc -l"
     try:
         output = subprocess.check_output(cmd_check_hostnameverifier, shell=True).splitlines()
         if int(output[0]) > 0:

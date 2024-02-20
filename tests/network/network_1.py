@@ -21,20 +21,18 @@ def check(wdir, apk, apk_hash, package_name):
 
     if lines > 0:
         try:
-            cmd = f'utils/check_network1_redirects.sh {wdir+"/http_net2.txt"}'
-            output = subprocess.check_output(cmd, shell=True)
-            urls_found = output.decode("utf-8").rstrip("\n")
+            http_location = wdir+"/http_net2.txt"
+
+            cmd = ['python3', 'utils/check_network1_redirects.py', http_location]
+            urls_found = subprocess.check_output(cmd, universal_newlines=True)
+
             if urls_found == "0":
-                database_utils.update_values(
-                    "Report", "NETWORK_1", "PASS", "HASH", apk_hash)
-                database_utils.update_values(
-                    "Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
+                database_utils.update_values("Report", "NETWORK_1", "PASS", "HASH", apk_hash)
+                database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
                 verdict = 'PASS'
             else:
-                database_utils.update_values(
-                    "Report", "NETWORK_1", "FAIL", "HASH", apk_hash)
-                database_utils.update_values(
-                    "Total_Fail_Counts", "NETWORK_1", urls_found, "HASH", apk_hash)
+                database_utils.update_values("Report", "NETWORK_1", "FAIL", "HASH", apk_hash)
+                database_utils.update_values("Total_Fail_Counts", "NETWORK_1", urls_found, "HASH", apk_hash)
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 pass 

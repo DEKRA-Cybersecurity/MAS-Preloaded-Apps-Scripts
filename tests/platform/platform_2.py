@@ -22,8 +22,8 @@ def check(wdir, apk, apk_hash, package_name):
     '''
     verdict = 'FAIL'
     total_matches = 0
-    regex_1 = "\"\\\"[ ]*(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|SELECT|UPDATE|UNION( +ALL){0,1})[a-zA-Z0-9\\ \\*_\\-\\=]+(\\ |\\\")[ ]?\\\+[ ]*[a-zA-Z0-9\\ \\*_\\-]+\""
-    regex_2 = "\"(shouldOverrideUrlLoading\\(.*\\{)[\\n\\s\\t]*return false;(\\n|[\\s\\t])\\}\""
+    regex_1 = "\"\\\"[ ]*(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|SELECT|UPDATE|UNION( +ALL){0,1})[ ]*[a-zA-Z0-9\\ \\*_\\-\\=]+(\\ |\\\")[ ]?\\+[ ]*[a-zA-Z0-9\\ \\*_\\-]+\""
+    regex_2 = "\"shouldOverrideUrlLoading\\(.*\\)[ ]*{[\\n\\s\\t]*(return false;)\""
     #cmd_webview = f'grep -rnwz -E {wdir}/decompiled | wc -l'
 
     cmd = f"grep -rnws --exclude='*.dex' -E {regex_1} {wdir}/decompiled/sources"
@@ -54,7 +54,7 @@ def check(wdir, apk, apk_hash, package_name):
         database_utils.insert_values_logging(apk_hash, ct, "PLATFORM-2", f"grep failed  for {regex_1}")
         pass #No output
 
-    cmd = f"grep -rlnwzs --exclude='*.dex' -E {regex_2} {wdir}/decompiled/sources"
+    cmd = f"grep -rlnwzs --exclude='*.dex' -P {regex_2} {wdir}/decompiled/sources"
     try:
         output = subprocess.check_output(cmd, shell=True).splitlines()
         if len(output) > 0:
