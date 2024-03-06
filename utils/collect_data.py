@@ -4,7 +4,6 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 import mysql.connector  # Import MySQL connector library
-# from ..settings import DB_USER_MASA, DB_PASSWORD_MASA
 import yaml
 
 import sys
@@ -13,12 +12,13 @@ import utils.formula as formula
 from db import database_utils
 from sqlalchemy import create_engine
 from utils.auxiliar_functions import use_semgrep, parse_timestamp, get_script_version, export_csv
+from settings import DB_USER_MASA, DB_PASSWORD_MASA, DB_HOST_MASA
 
 # Replace with your actual database connection details
 db_config = {
-    "host": "localhost",
-    "user": 'masa_script',
-    "password": 'MASA123',
+    "host": DB_HOST_MASA,
+    "user": DB_USER_MASA,
+    "password": DB_PASSWORD_MASA,
     "database": database_utils.get_database_name()
 }
 

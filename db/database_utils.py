@@ -1,9 +1,9 @@
 import mysql.connector
-from settings import DB_USER_MASA, DB_PASSWORD_MASA
+from settings import DB_USER_MASA, DB_PASSWORD_MASA, DB_HOST_MASA
 import yaml
 
 def first_execution(database='automated_MASA'):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
 
     cursor.execute('CREATE DATABASE ' + database)
@@ -101,7 +101,7 @@ def first_execution(database='automated_MASA'):
     ''')
 
 def get_values_TestSSL_URLS(id_value):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -117,7 +117,7 @@ def get_values_TestSSL_URLS(id_value):
         return "failed"
 
 def add_analyzed_app(apk_hash, uuid_execution, app_name, version_name, semgrep, script_version):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -133,7 +133,7 @@ def add_analyzed_app(apk_hash, uuid_execution, app_name, version_name, semgrep, 
         return "failed"
 
 def get_values_total_fail_counts(id_value, tests, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -150,7 +150,7 @@ def get_values_total_fail_counts(id_value, tests, uuid_execution):
         return "failed"
 
 def update_values(table, update_identifier, update_id_value, identifier, id_value, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -163,7 +163,7 @@ def update_values(table, update_identifier, update_id_value, identifier, id_valu
         print("Something Failed in table " + table)
 
 def insert_values_logging(apk_hash, package_name, timestamp, tc, error, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -176,7 +176,7 @@ def insert_values_logging(apk_hash, package_name, timestamp, tc, error, uuid_exe
         return "failed"
 
 def insert_new_finding(finding_data):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
     
@@ -190,7 +190,7 @@ def insert_new_finding(finding_data):
         return "failed"
 
 def insert_new_report(report_data):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -205,7 +205,7 @@ def insert_new_report(report_data):
 
 def insert_new_execution(uuid_execution, timestamp):
 
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
     
@@ -219,7 +219,7 @@ def insert_new_execution(uuid_execution, timestamp):
         return "failed"
 
 def insert_values_report(apk_hash, app_name, version_name, semgrep, script_version, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -232,7 +232,7 @@ def insert_values_report(apk_hash, app_name, version_name, semgrep, script_versi
         return "failed"
 
 def insert_values_permissions(apk_hash, package, permissions, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -245,7 +245,7 @@ def insert_values_permissions(apk_hash, package, permissions, uuid_execution):
         return "failed"
 
 def update_values_permissions_add_suid(apk_hash, suid, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -258,7 +258,7 @@ def update_values_permissions_add_suid(apk_hash, suid, uuid_execution):
         return "failed"
 
 def update_values_permissions_add_new_permissions_set(apk_hash, permissions, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -271,7 +271,7 @@ def update_values_permissions_add_new_permissions_set(apk_hash, permissions, uui
         return "failed"
 
 def get_scanned_apks(uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -290,7 +290,7 @@ def get_scanned_apks(uuid_execution):
 
 def unify_suid_permissions(uuid_execution):
     all_perms = ""
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -333,7 +333,7 @@ def unify_suid_permissions(uuid_execution):
         return "failed"
     
 def get_values_permissions(uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -350,7 +350,7 @@ def get_values_permissions(uuid_execution):
         return "failed"
 
 def insert_values_total_fail_count(apk_hash, uuid_execution):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -363,7 +363,7 @@ def insert_values_total_fail_count(apk_hash, uuid_execution):
         return "failed"
 
 def insert_values_testsslURLs(url, result):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -376,7 +376,7 @@ def insert_values_testsslURLs(url, result):
         return "failed"
 
 def clear_database(database='automated_MASA'):
-    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + database)
 
