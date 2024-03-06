@@ -7,6 +7,8 @@ __pycache__/
 # Apks to scan
 apks/
 
+# Results
+Results/
 # Virtual env
 myenv/
 

@@ -43,7 +43,7 @@ With the applications already stored in `/apks` and the database tables created,
 ```
 ./automate_apps_updated
 ```
-As a result of the analysis the data obtained will be exported, there are two options CSV or XLXS, to choose the format you must access the configuration file located in the path `/config/methods_config.yml` and give value (True/False) to the variable export_csv. The exported data can be found in the folder **/apks/Results/YYYYYYYYYYMMdd/HHmmss**.
+As a result of the analysis the data obtained will be exported, there are two options CSV or XLXS, to choose the format you must access the configuration file located in the path `/config/methods_config.yml` and give value (True/False) to the variable export_csv. The exported data can be found in the folder **/Results/YYYYYYYYYYMMdd/HHmmss**.
 
 In case you want to delete all the data in the database, you will need to execute the following command:
 ```
@@ -53,10 +53,8 @@ python3 -c "from db.database_utils import clear_database; clear_database()"
 ## Database structure
 `TestSSL_URL:`
 This table stores the URLs that have already been scanned in NETWORK-2 test case and the result.
-`SEMGREP_FINDINGS:`  
-This table stores all the matches found in the test cases when semgrep implementation is used. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file.  
-`DEKRA_FINDINGS:`
-This table stores all the matches found in the test cases when DEKRA implementation is used. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file. In some test cases where multiline match is required, it is not possible to get the line number of the match.  
+`Findings:`
+This table stores all the matches found in the test cases. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file. In some test cases where multiline match is required, it is not possible to get the line number of the match.  
 `Report:`
 This table stores the result of the test cases (PASS, FAIL or Need Review), information about the scan and information of the application. The application information stored is the hash, app_name and version_name to identify it. Regarding the scan information, it stores if semgrep option is enabled or not and the version of the script used in the analysis.  
 `Total_Fail_Counts:`
@@ -65,6 +63,7 @@ This table stores the hash of the application along with the number of matches f
 This table stores information about events that occurred during the execution of the script. The hash of the application and the time of the event is also stored, as well as the error message.  
 `Permissions:`
 This table stores the Android permissions required by the application.
+`Executions:` This table stores the identifier of the analysis with the timestamp.
 
 ## Risk Score
 To understand the result of the Risk Score, how its value is obtained, what parameters are taken into account and what formula is used, [read this paper](https://docs.google.com/document/d/1dnjXoHpVL5YmZTqVEC9b9JOfu6EzQiizZAHVAeDoIlo/edit).
@@ -87,9 +86,40 @@ In case you want to add new test cases, you have to follow the next steps:
 2. Access the directory `/tests/section/test_name.py` where section will be the name of the category and test_name the name of the test case to be added and copy the new test case.
 3. Inside the file `/tests/section/test_name.py` implement the test case code in a method called check(), the parameters that the check() method of all the test cases will receive will always be the same for all of them, which are defined in the file `/utils/auxiliary_functions.py` in the check_app method in the variable all_params. So if you need to add any additional variable you would have to add it in all_params and modify the headers of all the check() methods of each test case adding this/these new variable(s). 
 
-Once these steps have been followed, the execution of the script will also analyse the newly added test case. To check that no modifications have been made to the results of the rest of the test cases and that they are kept originally, we will check the results of the unit tests by executing the command:
+If you want the risk score to take into account the newly developed test case, you would have to add to the database tables (Report and Total_Fail_Counts) a new column with the name of the test case in capital letters (in case of adding new test cases to the database, the unit test that checks the formula would become FAIL).
+
+### Unit testing
+
+Once these steps have been followed, the execution of the script will also analyse the newly added test case. To check that no modifications have been made to the results of the rest of the test cases and that they are kept originally, we will check the results of the unit tests.
+
+To perform the execution of the unit tests it is necessary to follow several steps to have the environment correctly set up, since we need to specify the name of the database by means of a config variable (database) and the creation of a database for testing (automated_MASA_TESTING).
+
+1. Execute the database creation command.
+```
+python3 -c "from db.database_utils import first_execution; first_execution('automated_MASA_TESTING')"
+```
+2. Access the configuration file and change the value of the `database` variable to `automated_MASA_TESTING`
+3. Run an analysis prior to launching the unit tests, our input variables are the apks found in the /unit_tests/reference_apk/* directory. To run the analysis we have to launch the command:
+```
+./automated_apps_updated True
+```
+With this command we will run an analysis of the applications but we will use the variables, directories and databases destined for unit tests.
+
+4. Once the database has been created and the testing analysis has been executed, we can launch the unit tests with the command:
 ```
 pytest
 ```
+5. In case you want to launch the unit tests again, it will be necessary to clean the database, to do this we will launch the command:
+```
+python3 -c "from db.database_utils import clear_database; clear_database('automated_MASA_TESTING')"
+```
 
-If you want the risk score to take into account the newly developed test case, you would have to add to the database tables (Report and Total_Fail_Counts) a new column with the name of the test case in capital letters (in case of adding new test cases to the database, the unit test that checks the formula would become FAIL).
+If you want to re-launch the script with the normal behaviour it will be necessary to revert the changes, to do this we will have to change the value of the  variable of the configuration file `database` to `automated_MASA` and launch the script with the command 
+```
+./automated_apps_updated
+```
+
+## Logging information
+
+### Log: Application was decompiled and no sources folder was found.
+If the application does not contain source code directly in the package you are decompiling, jadx will not be able to create a /sources folder because there is simply no source code to extract.

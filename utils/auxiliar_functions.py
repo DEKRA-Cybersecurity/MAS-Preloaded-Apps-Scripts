@@ -9,8 +9,9 @@ import utils.formula as formula
 import xml.etree.ElementTree as ET
 import os
 import re
+import requests
 
-def check_signature(wdir, apk, apk_hash):
+def check_signature(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
     Returns output of apksigner to verify the signature.
     '''
@@ -24,14 +25,14 @@ def check_signature(wdir, apk, apk_hash):
             pass 
         else:
             ct = datetime.datetime.now()
-            database_utils.insert_values_logging(apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
+            database_utils.insert_values_logging(apk_hash, package_name, ct, "CODE-1", "apksigner failed verifying signature", uuid_execution)
             return "Invalid"
     except:
         ct = datetime.datetime.now()
-        database_utils.insert_values_logging(apk_hash, ct, "CODE-1", "apksigner failed verifying signature")
+        database_utils.insert_values_logging(apk_hash, package_name, ct, "CODE-1", "apksigner failed verifying signature", uuid_execution)
         return "Invalid"
 
-def check_debuggable(wdir, apk_hash):
+def check_debuggable(wdir, apk_hash, package_name, uuid_execution):
     '''
     Check if the application uses android:debuggable="true" in AndroidManifest.xml file
     '''
@@ -41,8 +42,7 @@ def check_debuggable(wdir, apk_hash):
     except subprocess.CalledProcessError as e:
         ct = datetime.datetime.now()
         if e.returncode == 2:
-            database_utils.insert_values_logging(
-                apk_hash, ct, "CODE-2", "grep android:debuggable command failed")
+            database_utils.insert_values_logging(apk_hash, package_name, ct, "CODE-2", "grep android:debuggable command failed", uuid_execution)
             output = "Error"
         else:
             output = "No relevant results"
@@ -57,8 +57,9 @@ def check_package_name(wdir, name):
     grep = "YXdrIC1GICdwYWNrYWdlPScgJ3twcmludCAkMn0nIHwgYXdrIC1GJyAnICd7cHJpbnQgJDF9JyB8IHNlZCBzL1wiLy9n"
     d_grep = base64.b64decode(grep).decode("utf-8")
     cmd = f"cat {wdir}/base/AndroidManifest.xml | {d_grep}"
-    output = subprocess.check_output(
-        cmd, shell=True).decode("utf-8").replace("\n", "")
+
+    output = subprocess.check_output(cmd, shell=True).decode("utf-8").replace("\n", "")
+
     if "split" in name:
         package = output + "_" + name
     else:
@@ -74,8 +75,7 @@ def check_hash_apk(wdir):
     Prints the application's hash - sha256
     '''
     cmd = f"sha256sum {wdir}/base.apk" + " | awk '{ print $1 }'"
-    output = subprocess.check_output(
-        cmd, shell=True).decode("utf-8").replace("\n", "")
+    output = subprocess.check_output(cmd, shell=True).decode("utf-8").replace("\n", "")
 
     return output
 
@@ -83,15 +83,14 @@ def get_suid_from_manifest(wdir):
     cmd_get_suid = f'cat {wdir}/base/AndroidManifest.xml | grep -Po "(?<=android:sharedUserId=)\\"[^\\"]+\\"" | sed \'s/\\"//g\''
 
     try:
-        out_suid = subprocess.check_output(
-            cmd_get_suid, shell=True).splitlines()
+        out_suid = subprocess.check_output(cmd_get_suid, shell=True).splitlines()
         out_suid_string = out_suid[0].decode()
     except:
         out_suid_string = ""  # No tiene SUID
 
     return out_suid_string
 
-def check_network_applies(wdir, apk_hash, internet):
+def check_network_applies(wdir, apk_hash, internet, uuid_execution):
 
     out_suid_string = get_suid_from_manifest(wdir)
     applies = False
@@ -104,46 +103,53 @@ def check_network_applies(wdir, apk_hash, internet):
         if content == "1":
             applies = True
         elif content == "0":
-            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash)
-            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash)
-            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash, uuid_execution)
 
     except:
         if internet == "1":
             applies = True
         else:
-            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash)
-            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash)
-            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
-            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash)
+            database_utils.update_values("Report", "NETWORK_1", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Report", "NETWORK_2", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Report", "NETWORK_3", "NA", "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_1", 0, "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash, uuid_execution)
+            database_utils.update_values("Total_Fail_Counts", "NETWORK_3", 0, "HASH", apk_hash, uuid_execution)
 
     return applies
 
-def check_app(wdir, apk, apk_hash, package_name, internet, semgrep, actual_timestamp):
+def check_app(wdir, apk, apk_hash, package_name, internet, semgrep, uuid_execution):
 
-    print("Starting scanning process...")
-    version_name = get_version_name(wdir)
-    script_version = dekra_script_version()
-    database_utils.insert_values_report(apk_hash, package_name, version_name, semgrep, script_version, actual_timestamp)
-    database_utils.insert_values_total_fail_count(apk_hash)
+    # if no content in /sources add in Logging table this error and no scan
+    if not (os.path.exists(wdir + '/decompiled/sources') and os.path.isdir(wdir + '/decompiled/sources')):
+        print('Application was decompiled and no sources folder was found. Skipping.')
+        ct = datetime.datetime.now()
+        database_utils.insert_values_logging(apk_hash, package_name, ct, 'Full Application', 'Application was decompiled and no sources folder was found.', uuid_execution)
 
-    with open('config/methods_config.yml') as f:
-        config = yaml.load(f, Loader=yaml.SafeLoader)
+    else:
+        print("Starting scanning process...")
+        version_name = get_version_name(wdir)
+        script_version = get_script_version()
+        database_utils.insert_values_report(apk_hash, package_name, version_name, semgrep, script_version, uuid_execution)
+        database_utils.insert_values_total_fail_count(apk_hash, uuid_execution)
 
-    # Check if the application has internet permissions or if another application with the same SUID has internet permissions
-    applies = check_network_applies(wdir, apk_hash, internet)
+        with open('config/methods_config.yml') as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    all_params = {'wdir': wdir, 'apk': apk,
-                  'apk_hash': apk_hash, 'package_name': package_name}
+        # Check if the application has internet permissions or if another application with the same SUID has internet permissions
+        applies = check_network_applies(wdir, apk_hash, internet, uuid_execution)
 
-    load_and_execute_methods(config['tests'], all_params, applies)
+        all_params = {'wdir': wdir, 'apk': apk,
+                    'apk_hash': apk_hash, 'package_name': package_name, 'uuid_execution': uuid_execution}
 
-    formula.extract_and_store_permissions(apk_hash, package_name, wdir)
+        load_and_execute_methods(config['tests'], all_params, applies)
+
+        formula.extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution)
 
 def load_and_execute_methods(config, all_params, applies):
     for category, tests in config.items():
@@ -167,7 +173,7 @@ def use_semgrep():
 
     return use
 
-def dekra_script_version():
+def get_script_version():
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
@@ -188,7 +194,6 @@ def get_version_name(wdir):
         with open(os.path.join(wdir + '/base/AndroidManifest.xml'), 'r') as file:
             content = file.read()
 
-            # Utilizar una expresión regular para encontrar android:versionName
             match = re.search(r'android:versionName\s*=\s*"([^"]+)"', content)
 
             if match:
@@ -198,3 +203,43 @@ def get_version_name(wdir):
 
     except Exception as e:
         return ''
+    
+def parse_timestamp(timestamp):
+    
+    parsed_timestamp = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
+
+    formatted_timestamp = parsed_timestamp.strftime('%Y%m%d_%H%M%S_%f')[:-3]
+
+    return formatted_timestamp
+
+def get_version_code(wdir):
+    try:
+        with open(os.path.join(wdir + '/base/AndroidManifest.xml'), 'r') as file:
+            content = file.read()
+
+            match = re.search(r'android:versionCode\s*=\s*"([^"]+)"', content)
+
+            if match:
+                return match.group(1)
+            else:
+                return ''
+
+    except Exception as e:
+        return ''
+    
+def check_scanned(apk_hash, package_name, wdir, uuid_execution):
+
+    certs = requests.get("https://appdefense-dot-devsite-v2-prod-3p.appspot.com/directory/data/certs.json").json()
+
+    version_code = get_version_code(wdir)
+    version_name = get_version_name(wdir)
+    semgrep = use_semgrep()
+    script_version = get_script_version()
+
+    for cert in certs["certificates"]:
+        if 'versionCode' in cert and 'packageName' in cert and version_code != '' and cert['versionCode'] == version_code and cert['packageName'] == package_name:
+            database_utils.add_analyzed_app(apk_hash, uuid_execution, package_name, version_name, semgrep, script_version)
+            formula.extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution)
+            return True
+        
+    return False

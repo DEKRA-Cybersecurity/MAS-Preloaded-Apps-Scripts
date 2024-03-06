@@ -5,9 +5,10 @@ import openpyxl
 import time
 from openpyxl import Workbook
 from settings import RULES_SEMGREP_PATH
+import datetime
 import re
 import db.database_utils as database_utils
-from utils.auxiliar_functions import get_version_name, dekra_script_version
+from utils.auxiliar_functions import get_version_name, get_script_version
 
 def scan_with_semgrep(target_path, rules_path):
     final_path = os.path.join(target_path, 'decompiled/sources/')
@@ -42,10 +43,11 @@ def extract_tc(tc_text):
     tc = match.group(1)
     return tc
 
-def write_to_database(app_results, apk_hash, package_name, version_name, script_version, actual_timestamp):
+def write_to_database(app_results, apk_hash, package_name, version_name, script_version, uuid_execution):
     
     res_app = {
         "HASH" : apk_hash, 
+        "ID_EXECUTION" : uuid_execution,
         "APP_NAME" : package_name, 
         "VERSION_NAME" : version_name,
         "SEMGREP" : True,
@@ -59,8 +61,7 @@ def write_to_database(app_results, apk_hash, package_name, version_name, script_
         "NETWORK-3" : "N/A", 
         "PLATFORM-2" : "N/A", 
         "PLATFORM-3" : "PASS", 
-        "STORAGE-2" : "PASS",
-        "TIMESTAMP" : actual_timestamp
+        "STORAGE-2" : "PASS"
     }
 
     for app_name, category_results in app_results.items():
@@ -70,7 +71,7 @@ def write_to_database(app_results, apk_hash, package_name, version_name, script_
                 path = finding.get("path", "N/A")
                 start_line = finding.get("start", {}).get("line", "N/A")
                 res_app[extract_tc(check_id)] = "FAIL"
-                database_utils.insert_new_finding([apk_hash, package_name, category, check_id, path, start_line])
+                database_utils.insert_new_finding([apk_hash, package_name, category, check_id, path, start_line, uuid_execution])
 
     database_utils.insert_new_report(list(res_app.values()))
 
@@ -98,17 +99,25 @@ def analyze_app(app_dir):
 
     return app_name, category_results
 
-def semgrep_scan(wdir, apk_hash, package_name, actual_timestamp):
+def semgrep_scan(wdir, apk_hash, package_name, uuid_execution):
 
-    app_results = {}
+    # if no content in /sources add in Logging table this error and no scan
+    if not (os.path.exists(wdir + '/decompiled/sources') and os.path.isdir(wdir + '/decompiled/sources')):
+        print('Application was decompiled and no sources folder was found. Skipping.')
+        ct = datetime.datetime.now()
+        database_utils.insert_values_logging(apk_hash, package_name, ct, 'Full Application', 'Application was decompiled and no sources folder was found.', uuid_execution)
 
-    if os.path.isdir(wdir):
-        app_name, category_results = analyze_app(wdir)
-        app_results[app_name] = category_results
-
-    if app_results:
-        version_name = get_version_name(wdir)
-        script_version = dekra_script_version()
-        write_to_database(app_results, apk_hash, package_name, version_name, script_version, actual_timestamp)
     else:
-        print("No findings detected across all apps.")
+        
+        app_results = {}
+
+        if os.path.isdir(wdir):
+            app_name, category_results = analyze_app(wdir)
+            app_results[app_name] = category_results
+
+        if app_results:
+            version_name = get_version_name(wdir)
+            script_version = get_script_version()
+            write_to_database(app_results, apk_hash, package_name, version_name, script_version, uuid_execution)
+        else:
+            print("No findings detected across all apps.")

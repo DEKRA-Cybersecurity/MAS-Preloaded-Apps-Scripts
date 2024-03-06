@@ -1,20 +1,26 @@
 #!/bin/bash
 
-actual_timestamp=$(date +"%Y%m%d_%H%M%S")
+actual_timestamp=$(date +'%Y-%m-%d %H:%M:%S.%6N')
+uuid_execution=$(uuidgen)
+
 path=$(pwd)
-delete_files=$1
+testing=$1
 apk_path='apks/*'
-resultsPath='apks/Results/'
-if [ "$delete_files" == "False" ]; then 
+resultsPath='Results/'
+
+if [ "$testing" == "True" ]; then 
 	apk_path='unit_tests/reference_apk/*'
+	uuid_execution='55555555-4444-3333-2222-111111111111'
+	echo "Unit tests will be executed."
 fi
+
+python3 -c "from db.database_utils import insert_new_execution; insert_new_execution('$uuid_execution', '$actual_timestamp')"
 
 jadxFunction()
 {
 	mkdir $absolute_dir/decompiled;
 
 	python3 $path/utils/decompile_jadx.py $absolute_dir/decompiled $absolute_dir/base.apk $path;
-
 
 	# Estos dos greps se encargan de extraer las URLs dentro del codigo.
 	grep -or -E "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/net2_$stripped.txt
@@ -43,7 +49,7 @@ jadxFunction()
 	    fi
 	fi
 	cd $path
-	python3 main.py $absolute_dir $has_internet $actual_timestamp;
+	python3 main.py $absolute_dir $has_internet $uuid_execution;
 	sleep 2
 }
 
@@ -67,10 +73,6 @@ apktoolFunction()
 					apktoolFunction
 				done
 			else
-				# if [ "$delete_files" != "False" ]; then 
-				# 	rm -r $absolute_dir/base;
-				# 	rm -r $absolute_dir/decompiled;
-				# fi
 				cd $path
 			fi
 		else
@@ -94,7 +96,7 @@ apktoolFunction
 
 checkResultsDirectory
 
-python3 utils/collect_data.py $actual_timestamp;
+python3 utils/collect_data.py "$actual_timestamp" $uuid_execution;
 
 find . -name "apkTool.txt" -exec rm {} \;
 

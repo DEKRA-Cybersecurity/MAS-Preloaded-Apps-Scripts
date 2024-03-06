@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import db.database_utils as database_utils
 import re, os
 
-def check(wdir, apk, apk_hash, package_name):
+def check(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
     Extract custom url from the application.
 
@@ -23,13 +23,13 @@ def check(wdir, apk, apk_hash, package_name):
                 custom_urls = custom_urls + 1
                                                 
     if custom_urls > 0:
-        database_utils.update_values("Report", "PLATFORM_3", "Needs Review", "HASH", apk_hash)
-        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", custom_urls, "HASH", apk_hash)
+        database_utils.update_values("Report", "PLATFORM_3", "Needs Review", "HASH", apk_hash, uuid_execution)
+        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", custom_urls, "HASH", apk_hash, uuid_execution)
         verdict = 'Needs Review'
     else:
-        database_utils.update_values("Report", "PLATFORM_3", "PASS", "HASH", apk_hash)
-        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", 0, "HASH", apk_hash)
+        database_utils.update_values("Report", "PLATFORM_3", "PASS", "HASH", apk_hash, uuid_execution)
+        database_utils.update_values("Total_Fail_Counts", "PLATFORM_3", custom_urls, "HASH", apk_hash, uuid_execution)
 
     print('PLATFORM-3 successfully tested.')
 
-    return verdict
+    return [verdict, custom_urls]

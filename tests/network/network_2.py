@@ -4,7 +4,7 @@ import db.database_utils as database_utils
 from settings import PATH_TESTSSL
 from utils.auxiliar_functions import get_suid_from_manifest
 
-def check(wdir, apk, apk_hash, package_name):
+def check(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
         Check for potentially vulnerable TLS configurations.
         If a match is found, INCONCLUSIVE is set, could be a potential FAIL
@@ -23,7 +23,7 @@ def check(wdir, apk, apk_hash, package_name):
             url_no_breakline = url.rstrip("\n")
             cmd = f'echo no | {PATH_TESTSSL} -P {url_no_breakline} 2>/dev/null | grep -E {grep_filter} | wc -l'
 
-            results = database_utils.get_values("TestSSL_URLS", "URL", url_no_breakline, None)
+            results = database_utils.get_values_TestSSL_URLS(url_no_breakline)
             
             if not results:
                 try:
@@ -36,11 +36,11 @@ def check(wdir, apk, apk_hash, package_name):
                         pass 
                     else:
                         ct = datetime.datetime.now()
-                        database_utils.insert_values_logging(apk_hash, ct, "NETWORK-2", "Command failed.")
+                        database_utils.insert_values_logging(apk_hash, package_name, ct, "NETWORK-2", "Command failed.", uuid_execution)
                         pass  # No output
                 except:
                     ct = datetime.datetime.now()
-                    database_utils.insert_values_logging(apk_hash, ct, "NETWORK-2", "Command failed.")
+                    database_utils.insert_values_logging(apk_hash, package_name, ct, "NETWORK-2", "Command failed.", uuid_execution)
                     pass  # No output
 
                 if url_total_match > 0:
@@ -53,16 +53,15 @@ def check(wdir, apk, apk_hash, package_name):
                     is_inconclusive = True
                     total_matches += 1
 
-            
-
     if is_inconclusive:
-        database_utils.update_values("Report", "NETWORK_2", "Needs Review", "HASH", apk_hash)
-        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", total_matches, "HASH", apk_hash)
+        database_utils.update_values("Report", "NETWORK_2", "Needs Review", "HASH", apk_hash, uuid_execution)
+        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", total_matches, "HASH", apk_hash, uuid_execution)
         verdict = 'Needs Review'
     else:
-        database_utils.update_values("Report", "NETWORK_2", "PASS", "HASH", apk_hash)
-        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash)
+        total_matches = 0
+        database_utils.update_values("Report", "NETWORK_2", "PASS", "HASH", apk_hash, uuid_execution)
+        database_utils.update_values("Total_Fail_Counts", "NETWORK_2", 0, "HASH", apk_hash, uuid_execution)
 
     print('NETWORK-2 successfully tested.')
 
-    return verdict
+    return [verdict, total_matches]

@@ -13,7 +13,7 @@ def extract_SUID(tree):
     shared_user_id = root.get('{http://schemas.android.com/apk/res/android}sharedUserId')
     return shared_user_id
 
-def extract_and_store_permissions(apk_hash, package_name, wdir):
+def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
     wdir = wdir+"/base/AndroidManifest.xml"
     tree = ET.parse(wdir)
     root = tree.getroot()
@@ -29,11 +29,11 @@ def extract_and_store_permissions(apk_hash, package_name, wdir):
 
     # Print the permissions and scores
     permissions_from_app = ','.join(str(x) for x in permissions)  #This is to upload the permissions to the table
-    database_utils.insert_values_permissions(apk_hash, package_name, permissions_from_app)
+    database_utils.insert_values_permissions(apk_hash, package_name, permissions_from_app, uuid_execution)
 
     suid = extract_SUID(tree)
     if suid is not None:
-        database_utils.update_values_permissions_add_suid(apk_hash, suid)
+        database_utils.update_values_permissions_add_suid(apk_hash, suid, uuid_execution)
 
 #FORMULA IS:
 # All apps permission shall be extracted prior to formula calculation
@@ -42,12 +42,12 @@ def extract_and_store_permissions(apk_hash, package_name, wdir):
 get_risk returns the risk associated to a permission, if that app holds a "risky" permission.
 '''
 
-def get_m_value(p, tests, actual_timestamp):
+def get_m_value(p, tests, uuid_execution):
     total_fails = 0
-    record_apps = database_utils.get_values_permissions(actual_timestamp)
+    record_apps = database_utils.get_values_permissions(uuid_execution)
     for rapp in record_apps:
-        if p in rapp[2]:
-            records = database_utils.get_values("Total_Fail_Counts", "HASH", rapp[0], tests)
+        if p in rapp[3]:
+            records = database_utils.get_values_total_fail_counts(rapp[0], tests, uuid_execution)
             for r in records:
                 for i in range(1,len(r)):
                     total_fails += r[i]
@@ -64,22 +64,22 @@ def get_risk(p, permissions):
 '''
 get_value_k returns the number of apps that holds permission p
 '''
-def get_value_k(p, actual_timestamp):
+def get_value_k(p, uuid_execution):
     total_apps = 0
-    records = database_utils.get_values_permissions(actual_timestamp)
+    records = database_utils.get_values_permissions(uuid_execution)
     for r in records:
-        if p in r[2]:
+        if p in r[3]:
             total_apps += 1
 
     return total_apps
 
-def calculate_formula(Constant1, Constant2, tests, actual_timestamp):
+def calculate_formula(Constant1, Constant2, tests, uuid_execution):
     result = 0
     all_permissions = get_all_permissions()
     for p in all_permissions:
         risk = get_risk(p, all_permissions)  # Replace `get_risk(p)` with your specific risk calculation for each p
-        value_k = get_value_k(p, actual_timestamp)  # Replace `get_value_k(p)` with your specific value K calculation for each p
-        M = get_m_value(p, tests, actual_timestamp)
+        value_k = get_value_k(p, uuid_execution)  # Replace `get_value_k(p)` with your specific value K calculation for each p
+        M = get_m_value(p, tests, uuid_execution)
         term = risk * (1 - ((1 - Constant1) ** value_k) * ((1 - Constant2) ** M))
 
         result += term
