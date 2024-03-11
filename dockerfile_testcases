@@ -1,0 +1,8 @@
+FROM ubuntu_base:latest
+
+WORKDIR /usr/src/app
+
+COPY submodules/TestCasesScripts/requirements.txt ./
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
+
+COPY submodules/TestCasesScripts/. .

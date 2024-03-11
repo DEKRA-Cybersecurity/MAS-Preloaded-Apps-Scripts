@@ -1,0 +1,9 @@
+FROM ubuntu:23.10
+
+RUN apt-get update && apt-get install -y uuid-runtime \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+
+RUN apt update && apt upgrade -y
+RUN apt install -y python3 python3-pip openjdk-21-jre-headless build-essential libmagic-dev unzip jarwrapper wget

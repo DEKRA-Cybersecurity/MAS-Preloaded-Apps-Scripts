@@ -1,3 +1,59 @@
+# Docker
+
+## Getting started
+This project encompasses three Dockerfiles, which are:
+
+- dockerfile_testcases: This Dockerfile generates an Ubuntu-based container image, tailored for executing Python scripts. It is specifically configured to run Python scripts from the TestCasesScripts project.
+- dockerfile_extractor: This Dockerfile constructs a container designed to execute the contents of the AndScanner project, which are stored in the `/submodules` folder.
+- dockerfile_ubuntu_base: This Dockerfile creates a container image based on Ubuntu version 23.10.
+
+To complete the configuration of the repository, it will be necessary to clone the (following repository)[https://github.com/CookieCrumbs19212/AndScanner] inside the path `/submodules`
+
+In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. Before building the Docker containers, it is essential to adjust these variables to your desired values.
+
+Once everything is configured, it's time to build the dockers by executing:
+```
+sudo docker build -t ubuntu_base:latest -f dockerfile_ubuntu_base .;
+```
+
+```
+sudo docker build -t android-scoring-testcases:latest -f dockerfile_testcases .;
+```
+
+```
+sudo docker build -t android-scoring-extractor:latest -f dockerfile_extractor .;
+```
+
+Then, analysis can be initiated. To proceed, store the image of the application or set of applications and execute the file run.sh using the following command:
+- In case a device image will be analysed, run:
+```
+sudo ./run.sh True
+```
+- In case a set of apps will be analysed, run:
+```
+sudo ./run.sh
+```
+
+## Types of Scans
+Dockers can be run in two different ways: through the image of a device or through a set of applications of your choice.
+
+### Device image
+To scan the image from a device, it will be necessary to store the image in the `/data/images` folder.
+
+### Set of applications
+It is also possible to scan a set of applications without the need of a device image. This can be achieved by storing the applications in the following path:` /data/ramdisk/apks/`, with each APK stored in its own folder. For example:
+
+- `/data`: Main project directory.
+    - `/ramdisk`: Ramdisk directory.
+        - `/apks`: Directory that will contain all apks.
+            - `/folder_1`: Subdirectory containing apk_1.
+                - `app_1.apk`
+            - `/folder_2`: Subdirectory containing apk_2.
+                - `app_2.apk`
+            - `/folder_3`: Subdirectory containing apk_3.
+                - `app_3.apk`
+            - ...
+
 # Scripts MASA
 
 ## Getting started
@@ -79,6 +135,7 @@ In order to run the script and get the results, you will need to use additional 
  - TESTSSL: Identify and report known vulnerabilities in the SSL/TLS configuration. This may include detection of weak configurations, support for outdated protocol versions, and other security issues.
  - SEMGREP: Open-source static analysis tool designed to identify and locate code patterns in source code. Developed to enhance and streamline the process of code review and security analysis, Semgrep employs a pattern-based approach to scan codebases for potential issues, bugs, or security vulnerabilities.
  Test cases CODE-2, CRYPTO-1, NETWORK-2, PLATFORM-3 and STORAGE-2 can be executed using semgrep and the rules developed by OWASP. To do so, access the configuration file located at config/methods_config.yaml and set the value of semgrep tag to True.
+ - ANDSCANNER: This tool is used to extract the firmware image.
 
 ## Adding new test cases
 In case you want to add new test cases, you have to follow the next steps:
