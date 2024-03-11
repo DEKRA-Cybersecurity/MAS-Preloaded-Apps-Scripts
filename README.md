@@ -7,7 +7,7 @@ This project encompasses three Dockerfiles, which are:
 - dockerfile_extractor: This Dockerfile constructs a container designed to execute the contents of the AndScanner project, which are stored in the `/submodules` folder.
 - dockerfile_ubuntu_base: This Dockerfile creates a container image based on Ubuntu version 23.10.
 
-To complete the configuration of the repository, it will be necessary to clone the (following repository)[https://github.com/CookieCrumbs19212/AndScanner] inside the path `/submodules`
+To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/submodules`
 
 In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. Before building the Docker containers, it is essential to adjust these variables to your desired values.
 
