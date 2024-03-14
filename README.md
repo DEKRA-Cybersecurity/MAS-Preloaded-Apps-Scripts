@@ -7,7 +7,7 @@ This project encompasses three Dockerfiles, which are:
 - dockerfile_extractor: This Dockerfile constructs a container designed to execute the contents of the AndScanner project, which are stored in the `/submodules` folder.
 - dockerfile_ubuntu_base: This Dockerfile creates a container image based on Ubuntu version 23.10.
 
-To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/submodules`
+To complete the configuration of the repository, it will be necessary to clone the (following repository)[https://github.com/CookieCrumbs19212/AndScanner] inside the path `/submodules`
 
 In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. Before building the Docker containers, it is essential to adjust these variables to your desired values.
 
@@ -41,18 +41,7 @@ Dockers can be run in two different ways: through the image of a device or throu
 To scan the image from a device, it will be necessary to store the image in the `/data/images` folder.
 
 ### Set of applications
-It is also possible to scan a set of applications without the need of a device image. This can be achieved by storing the applications in the following path:` /data/ramdisk/apks/`, with each APK stored in its own folder. For example:
-
-- `/data`: Main project directory.
-    - `/ramdisk`: Ramdisk directory.
-        - `/apks`: Directory that will contain all apks.
-            - `/folder_1`: Subdirectory containing apk_1.
-                - `app_1.apk`
-            - `/folder_2`: Subdirectory containing apk_2.
-                - `app_2.apk`
-            - `/folder_3`: Subdirectory containing apk_3.
-                - `app_3.apk`
-            - ...
+It is also possible to scan a set of applications without the need of a device image. This can be achieved by storing all the applications (apk files) in the following path: `/data/ramdisk/apks/`
 
 # Scripts MASA
 
@@ -73,7 +62,31 @@ The first step is to install the necessary packages using the requirements.txt f
 pip install -r requirements.txt
 ```
 
-In order to register the data in the database, it will be necessary to set up a mysql database and modify the variables **DB_USER_MASA** and **DB_PASSWORD_MASA** in the settings.py file.
+In order to register the data in the database, it will be necessary to set up a mysql database following these steps:
+- Download and install MySQL database server
+```
+sudo apt install mysql-server
+```
+
+- MySQL should start automatically after installation. However, if it's not started, you can
+start it manually using:
+```
+sudo systemctl start mysql
+```
+- Connect as root to create a new user:
+```
+mysql -u root -p
+```
+- Create a user named `masa_script`, as in settings.py , and grant it privileges. One can
+also choose other credentials and update the file settings.py
+
+```
+mysql> CREATE USER masa_script@localhost IDENTIFIED BY 'MASA123';
+mysql> GRANT ALL PRIVILEGES ON *.* TO masa_script@localhost;
+mysql> FLUSH PRIVILEGES;
+mysql> exit;
+```
+
 
 ## Documentation
 

@@ -211,35 +211,20 @@ def parse_timestamp(timestamp):
     formatted_timestamp = parsed_timestamp.strftime('%Y%m%d_%H%M%S_%f')[:-3]
 
     return formatted_timestamp
-
-def get_version_code(wdir):
-    try:
-        with open(os.path.join(wdir + '/base/AndroidManifest.xml'), 'r') as file:
-            content = file.read()
-
-            match = re.search(r'android:versionCode\s*=\s*"([^"]+)"', content)
-
-            if match:
-                return match.group(1)
-            else:
-                return ''
-
-    except Exception as e:
-        return ''
     
 def check_scanned(apk_hash, package_name, wdir, uuid_execution):
 
     certs = requests.get("https://appdefense-dot-devsite-v2-prod-3p.appspot.com/directory/data/certs.json").json()
 
-    version_code = get_version_code(wdir)
     version_name = get_version_name(wdir)
     semgrep = use_semgrep()
     script_version = get_script_version()
 
     for cert in certs["certificates"]:
-        if 'versionCode' in cert and 'packageName' in cert and version_code != '' and cert['versionCode'] == version_code and cert['packageName'] == package_name:
+        if 'packageName' in cert and cert['packageName'] == package_name:
             database_utils.add_analyzed_app(apk_hash, uuid_execution, package_name, version_name, semgrep, script_version)
             formula.extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution)
+            print('APP ' + package_name + ' scanned before.')
             return True
         
     return False

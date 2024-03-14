@@ -71,6 +71,25 @@ if [ "$image" == "True" ]; then
   done;
 
 else
+
+  if [ ! -d "$APK_PATH" ]; then
+      echo "The specified directory does not exist."
+      return 1
+  fi
+
+  for apk_file in "$APK_PATH"/*.apk; do
+    if [ -f "$apk_file" ]; then
+      apk_name="${apk_file##*/}"
+      apk_name="${apk_name%.apk}"
+      folder_name="${APK_PATH}/${apk_name}"
+
+      if [ ! -d "$folder_name" ]; then
+          mkdir -m 777 -p "$folder_name"
+      fi
+
+      mv "$apk_file" "$folder_name"
+    fi
+  done
     
   uuid=$(sudo docker run -v "$APK_PATH:/usr/src/app/apks" -v "$APK_PATH/Results:/usr/src/app/Results" --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest /bin/bash automate_apps_updated 1 | tee /dev/tty | grep "UUID:" | awk '{print $2}')
   echo "[+] Ran the TestCases script" 
