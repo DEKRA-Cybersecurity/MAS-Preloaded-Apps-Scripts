@@ -1,4 +1,4 @@
-version: 2.1
+version: 2.2
 semgrep: False
 export_csv: False 
 database: automated_MASA
