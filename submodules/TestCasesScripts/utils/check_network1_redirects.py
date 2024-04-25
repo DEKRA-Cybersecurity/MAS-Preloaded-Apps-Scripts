@@ -2,6 +2,7 @@ import sys
 import requests
 import subprocess
 import re
+import datetime
 
 def get_location(result):
     location_line = re.search(r'Location: (.+)', result)
@@ -27,29 +28,29 @@ def check_redirects(urls):
                         urls_found.add(url)
 
             except (requests.exceptions.TooManyRedirects):
-                print('request.exceptions.TooManyRedirects: ', url)
-                continue
-            except Exception:
-                continue
+                print('request.exceptions.TooManyRedirects:', url)
+                pass
+            except Exception as e:
+                pass
 
-    print(len(urls_found))
+    return len(urls_found)
 
 def get_set_urls(urls_path):
 
     urls_set = set()
 
     with open(urls_path, "r") as file:
-        for linea in file:
-            url = linea.strip() 
+        for line in file:
+            url = line.strip() 
             urls_set.add(url)
 
     return urls_set
 
-if __name__ == "__main__":
 
-    urls_path = sys.argv[1]
-
+def check(urls_path, apk_hash, package_name, uuid_execution):
     # Get unique set of urls in file
     urls_set = get_set_urls(urls_path)
 
-    check_redirects(urls_set)
+    urls = check_redirects(urls_set)
+
+    return urls

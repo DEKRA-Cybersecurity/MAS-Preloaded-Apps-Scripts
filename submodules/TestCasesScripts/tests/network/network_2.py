@@ -2,7 +2,7 @@ import subprocess
 import datetime
 import db.database_utils as database_utils
 from settings import PATH_TESTSSL
-from utils.auxiliar_functions import get_suid_from_manifest
+from utils.auxiliar_functions import get_suid_from_manifest, remove_last_backslash
 
 def check(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
@@ -21,7 +21,8 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
         for url in all_urls:
             url_total_match = 0
             url_no_breakline = url.rstrip("\n")
-            cmd = f'echo no | {PATH_TESTSSL} -P {url_no_breakline} 2>/dev/null | grep -E {grep_filter} | wc -l'
+            final_url = remove_last_backslash(url_no_breakline)
+            cmd = f'echo no | {PATH_TESTSSL} -P {final_url} 2>/dev/null | grep -E {grep_filter} | wc -l'
 
             results = database_utils.get_values_TestSSL_URLS(url_no_breakline)
             

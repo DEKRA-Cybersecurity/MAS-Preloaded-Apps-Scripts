@@ -10,30 +10,33 @@ APK_PATH="$RAMDISK/apks"
 
 image=$1
 
-# Setup MYSQL for the Test cases script
-sudo docker container rm -f db || true;
-sudo docker network rm -f testcases || true;
-echo "[+] Removed old containers and networks"
+# If there is no network testcases, create it
+if ! sudo docker network ls --format '{{.Name}}' | grep -q "^testcases$"; then
+    sudo docker network create testcases;
+    echo "[+] Created the network"
+fi
 
-sudo docker network create testcases;
-sudo docker run -it -e MYSQL_RANDOM_ROOT_PASSWORD=1 -e MYSQL_USER=masa_script -e MYSQL_PASSWORD=MASA123 -e MYSQL_DATABASE=automated_MASA --name db --network testcases -d mysql:8
-echo "[+] Created the network and started the MySQL database"
-
-# Setup the Test Cases database (initial wait required for service discovery to wake up)
-sudo docker run --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest python3 -c "import time; time.sleep(15); from db.database_utils import first_execution; first_execution()"
-echo "[+] Created the Test Cases database"
+# If there is no container db, create it
+if ! sudo docker ps -a --format '{{.Names}}' | grep -q "^db$"; then
+    sudo docker run -it -e MYSQL_RANDOM_ROOT_PASSWORD=1 -e MYSQL_USER=masa_script -e MYSQL_PASSWORD=MASA123 -e MYSQL_DATABASE=automated_MASA --name db --network testcases -d mysql:8
+    sudo docker run --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest python3 -c "import time; time.sleep(15); from db.database_utils import first_execution; first_execution()"
+    echo "[+] Created the Test Cases database"
+fi
 
 if [ "$image" == "True" ]; then 
 
-  sudo rm -r "$APK_PATH"/*
+  if [ "$(ls -A "$APK_PATH")" ]; then
+    sudo rm -r "$APK_PATH"/*
+  fi
 
   for DIRECTORY in "${IMAGES[@]}"; do
     VENDOR_DIR="$IMAGES_PATH$DIRECTORY"
     if [ -d "$VENDOR_DIR" ]; then
       VENDOR_IMAGES=($(ls "$VENDOR_DIR"))
       for IMAGE in "${VENDOR_IMAGES[@]}"; do
+        EXTRACTION_LOGS="/tmp/logs"
         IMAGE_PATH="$VENDOR_DIR/$IMAGE"
-        sudo docker run -v "$(pwd)/data/:/usr/src/app/data" -it android-scoring-extractor:latest "$IMAGE_PATH" "$DIRECTORY" "data/ramdisk"
+        docker run --tmpfs /tmp -v "$(pwd)/data/:/usr/src/app/data" -v "$EXTRACTION_LOGS:/usr/src/app/romanalyzer_extractor/log" -it android-scoring-extractor:latest "$IMAGE_PATH" "data/ramdisk"        
         echo "[+] Extracted the firmware image $IMAGE_PATH"
         EXTRACTED_IMAGE_PATH="$RAMDISK/$IMAGE.extracted"
         
@@ -42,16 +45,20 @@ if [ "$image" == "True" ]; then
         APKS=($(sudo find "$EXTRACTED_IMAGE_PATH" -name "*.apk"))
         mkdir -m 777 -p "$APK_PATH"
         mkdir -m 777 -p "$APK_PATH/$IMAGE"
+
         # Run the Test Cases script
         for APK in "${APKS[@]}"; do
           sudo mv "$APK" "$APK_PATH/$IMAGE"
         done;
+
         APK_FILES=($(sudo find $APK_PATH/$IMAGE -type f -name \*.apk))
+
         for APK in "${APK_FILES[@]}"; do
           DIR="${APK/.apk/}"
           mkdir -p "$DIR"
           mv "$APK" "$DIR"
         done;
+        
         sudo rm -r "$EXTRACTED_IMAGE_PATH"
 
         if [ ! -d "$APK_PATH/$IMAGE/Results" ]; then

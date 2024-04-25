@@ -10,9 +10,10 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
         output_sign_count = 0
         signature_info = check_signature(wdir, apk, apk_hash, package_name, uuid_execution)
 
-        for i in signature_info:
-            if "v2): true" in i or "v3): true" in i:
-                output_sign_count += 1
+        if signature_info:
+            for i in signature_info:
+                if "v2): true" in i or "v3): true" in i:
+                    output_sign_count += 1
                 
         if output_sign_count >= 1:
             verdict = 'PASS'

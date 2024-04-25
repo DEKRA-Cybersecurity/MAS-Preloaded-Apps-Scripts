@@ -13,7 +13,8 @@ def first_execution(database='automated_MASA'):
     cursor.execute('''
         CREATE TABLE Executions (
             ID VARCHAR(255) PRIMARY KEY,
-            TIMESTAMP VARCHAR(255)
+            TIMESTAMP VARCHAR(255),
+            RISK_SCORE DOUBLE
         )
     ''')
 
@@ -269,6 +270,19 @@ def update_values_permissions_add_new_permissions_set(apk_hash, permissions, uui
         cnx.commit()
     except:
         return "failed"
+
+def set_risk_score(uuid_execution, risk_score):
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE ' + get_database_name())
+
+    query = """UPDATE Executions SET RISK_SCORE = %s WHERE ID = %s"""
+    
+    try:
+        cursor.execute(query, (risk_score, uuid_execution,))
+        cnx.commit()
+    except:
+        print("Something Failed in table Executions")
 
 def get_scanned_apks(uuid_execution):
     cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)

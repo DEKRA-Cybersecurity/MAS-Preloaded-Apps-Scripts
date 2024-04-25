@@ -83,8 +83,12 @@ def calculate_formula(Constant1, Constant2, tests, uuid_execution):
         term = risk * (1 - ((1 - Constant1) ** value_k) * ((1 - Constant2) ** M))
 
         result += term
+    
+    risk_score = round(result, 4)
 
-    return round(result, 4)
+    database_utils.set_risk_score(uuid_execution, risk_score)
+
+    return risk_score
 
 def get_all_permissions():
     with open('config/methods_config.yml') as f:

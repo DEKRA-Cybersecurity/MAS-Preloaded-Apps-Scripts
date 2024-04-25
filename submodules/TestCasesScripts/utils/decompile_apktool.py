@@ -6,10 +6,7 @@ def decompile(app_path, script_path):
     command = [script_path+"/tools/apktool", "d", app_path]
     try:
         process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
-        
-        # Output is not displayed
-                
-        process.wait()
+        stdout, stderr = process.communicate(timeout=180)
 
     except Exception as e:
 
@@ -17,9 +14,9 @@ def decompile(app_path, script_path):
         retry_command = [script_path+"/tools/apktool", "d", "-f", "--no-res", app_path]
 
         try:
-            proceso_retry = subprocess.Popen(retry_command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+            process_retry = subprocess.Popen(retry_command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
             
-            for line in proceso_retry.stdout:
+            for line in process_retry.stdout:
                 if 'Exception in thread "main" brut.androlib.AndrolibException: Invalid chunk type:' in line :
                     print('APKTOOL ERROR: An attempt has been made to decompile an .apk that does not qualify as an application.', end='\n')
                 elif 'W: Cant find 9patch chunk in file' in line:
@@ -29,7 +26,7 @@ def decompile(app_path, script_path):
                     modified_line = line.replace("I:", "APKTOOL INFO:")
                     print(modified_line, end='')
                     
-            proceso_retry.wait()
+            process_retry.wait()
 
         except subprocess.CalledProcessError as e:
             print("APKTOOL ERROR:", e)

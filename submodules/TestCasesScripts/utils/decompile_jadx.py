@@ -42,7 +42,7 @@ def decompile(output_path, app_path, script_path):
         process.wait()
 
     except subprocess.CalledProcessError as e:
-        print("Error al ejecutar el comando:", e)
+        print("Error executing command:", e)
 
 if __name__ == "__main__":
 

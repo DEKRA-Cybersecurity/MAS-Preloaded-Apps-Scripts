@@ -2,6 +2,7 @@ import subprocess
 import datetime
 import db.database_utils as database_utils
 from utils.auxiliar_functions import get_suid_from_manifest
+import utils.check_network1_redirects as network1
 
 def check(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
@@ -24,9 +25,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
         try:
             http_location = wdir+"/http_net2.txt"
 
-            cmd = ['python3', 'utils/check_network1_redirects.py', http_location]
-            urls_found = subprocess.check_output(cmd, universal_newlines=True)
-            total_matches = int(urls_found.strip())
+            total_matches = network1.check(http_location, apk_hash, package_name, uuid_execution)
             
             if total_matches == 0:
                 database_utils.update_values("Report", "NETWORK_1", "PASS", "HASH", apk_hash, uuid_execution)
@@ -42,7 +41,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
                 ct = datetime.datetime.now()
                 database_utils.insert_values_logging(apk_hash, package_name, ct, "NETWORK-1", "Check redirects script failed", uuid_execution)
                 pass
-        except:
+        except Exception as e:
             ct = datetime.datetime.now()
             database_utils.insert_values_logging(apk_hash, package_name, ct, "NETWORK-1", "Check redirects script failed", uuid_execution)
             pass

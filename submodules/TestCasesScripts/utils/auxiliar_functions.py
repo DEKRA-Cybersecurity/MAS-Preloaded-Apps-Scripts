@@ -22,6 +22,7 @@ def check_signature(wdir, apk, apk_hash, package_name, uuid_execution):
         return output
     except subprocess.CalledProcessError as e:
         if e.returncode == 1:
+            return "Invalid"
             pass 
         else:
             ct = datetime.datetime.now()
@@ -228,3 +229,8 @@ def check_scanned(apk_hash, package_name, wdir, uuid_execution):
             return True
         
     return False
+
+def remove_last_backslash(text):
+    if text.endswith('\\'):
+        return text[:-1]
+    return text
