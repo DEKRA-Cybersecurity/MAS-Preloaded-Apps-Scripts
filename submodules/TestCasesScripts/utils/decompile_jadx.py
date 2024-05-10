@@ -39,9 +39,9 @@ def decompile(output_path, app_path, script_path):
 
                 print(line, end='')
                 
-        process.wait()
+        process.wait(timeout=300)
 
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         print("Error executing command:", e)
 
 if __name__ == "__main__":

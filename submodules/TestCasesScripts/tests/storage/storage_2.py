@@ -12,7 +12,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
     cmd = f"grep -n --exclude='*.dex' -iE WRITE_EXTERNAL_STORAGE {wdir}/base/AndroidManifest.xml"
 
     try:
-        output = subprocess.check_output(cmd, shell=True).splitlines()
+        output = subprocess.check_output(cmd, shell=True, timeout=300).splitlines()
         if output:
             output_write_external += 1   
             match_line = output[0].decode().strip().split(':', 1)[0]

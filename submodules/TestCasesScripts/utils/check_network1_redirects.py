@@ -20,7 +20,7 @@ def check_redirects(urls):
                 status_code = response.status_code
                 
                 if status_code < 400:
-                    result = subprocess.check_output(['curl', '-v', '--silent', url], stderr=subprocess.STDOUT)
+                    result = subprocess.check_output(['curl', '-v', '--silent', url], stderr=subprocess.STDOUT, timeout=60)
 
                     location_url = get_location(result.decode('utf-8'))
 

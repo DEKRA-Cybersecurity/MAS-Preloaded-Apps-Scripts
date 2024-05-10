@@ -26,9 +26,9 @@ def decompile(app_path, script_path):
                     modified_line = line.replace("I:", "APKTOOL INFO:")
                     print(modified_line, end='')
                     
-            process_retry.wait()
+            process_retry.wait(timeout=300)
 
-        except subprocess.CalledProcessError as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             print("APKTOOL ERROR:", e)
 
 
