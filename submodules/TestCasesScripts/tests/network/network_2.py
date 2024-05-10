@@ -28,7 +28,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
             
             if not results:
                 try:
-                    output = subprocess.check_output(cmd, shell=True).splitlines()
+                    output = subprocess.check_output(cmd, shell=True, timeout=300).splitlines()
                     if int(output[0]) > 0:
                         total_matches += 1
                         url_total_match = 1

@@ -38,7 +38,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
 
     cmd = f"grep -rlnws --exclude='*.dex' -E {regex_2} {wdir}/decompiled/sources"
     try:
-        output = subprocess.check_output(cmd, shell=True).splitlines()
+        output = subprocess.check_output(cmd, shell=True, timeout=300).splitlines()
         if len(output) > 0:
             total_matches += len(output)
             for match in output:

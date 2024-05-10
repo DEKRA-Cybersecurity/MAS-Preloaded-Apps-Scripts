@@ -13,7 +13,7 @@ def check(wdir, apk, apk_hash, package_name, uuid_execution):
     
     cmd =f"cat {wdir}/base/AndroidManifest.xml |  egrep -iE 'android:networkSecurityConfig' | wc -l"
     try:
-        output = subprocess.check_output(cmd, shell=True).strip()
+        output = subprocess.check_output(cmd, shell=True, timeout=300).strip()
         if int(output) > 0:
             net_config = True
     except subprocess.CalledProcessError as e:

@@ -17,7 +17,7 @@ def scan_with_semgrep(target_path, rules_path):
     findings_list = []
     
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=900)
         findings = json.loads(result.stdout)
         
         for finding in findings.get("results", []):

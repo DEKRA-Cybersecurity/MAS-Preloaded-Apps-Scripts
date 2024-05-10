@@ -18,7 +18,7 @@ def check_signature(wdir, apk, apk_hash, package_name, uuid_execution):
     try:
         cmd = f"{PATH_APKSIGNER} verify -verbose {wdir}/{apk}"
         output = [i.decode("utf-8")
-                  for i in subprocess.check_output(cmd, shell=True).splitlines()]
+                  for i in subprocess.check_output(cmd, shell=True, timeout=300).splitlines()]
         return output
     except subprocess.CalledProcessError as e:
         if e.returncode == 1:
