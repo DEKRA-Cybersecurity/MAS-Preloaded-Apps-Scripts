@@ -5,14 +5,14 @@ __pycache__/
 .pytest_cache
 
 # Apks script folder to scan
-submodules/TestCasesScripts/apks/
+apks/
 
 # Virtual env
-submodules/TestCasesScripts/myenv/
+myenv/
 
 # Unit tests
-submodules/TestCasesScripts/unit_tests/reference_apk/*.txt
-submodules/TestCasesScripts/unit_tests/reference_apk/Bluetooth/*.txt
-submodules/TestCasesScripts/unit_tests/reference_apk/Bluetooth/base
-submodules/TestCasesScripts/unit_tests/reference_apk/Bluetooth/decompiled
-submodules/TestCasesScripts/unit_tests/reference_apk/Bluetooth/{}
+unit_tests/reference_apk/*.txt
+unit_tests/reference_apk/Bluetooth/*.txt
+unit_tests/reference_apk/Bluetooth/base
+unit_tests/reference_apk/Bluetooth/decompiled
+unit_tests/reference_apk/Bluetooth/{}
