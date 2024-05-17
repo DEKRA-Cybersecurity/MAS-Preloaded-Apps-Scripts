@@ -150,6 +150,27 @@ def get_values_total_fail_counts(id_value, tests, uuid_execution):
     except:
         return "failed"
 
+def get_all_uuid_executions():
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE ' + get_database_name())
+    
+    query = f"""SELECT ID FROM Executions"""
+
+    try:
+        cursor = cnx.cursor()
+        cursor.execute(query, )
+        records = cursor.fetchall()
+        ids = ""
+        
+        if records:
+            ids = [record[0] for record in records]
+
+        return ids
+
+    except:
+        return "failed"
+
 def update_values(table, update_identifier, update_id_value, identifier, id_value, uuid_execution):
     cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
@@ -162,6 +183,22 @@ def update_values(table, update_identifier, update_id_value, identifier, id_valu
         cnx.commit()
     except:
         print("Something Failed in table " + table)
+
+def get_permissions_execution(uuid_execution):
+    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE ' + get_database_name())
+
+    query = f"""SELECT HASH, APP_NAME, Permissions FROM Permissions WHERE ID_EXECUTION = %s"""
+
+    try:
+        cursor = cnx.cursor()
+        cursor.execute(query, (uuid_execution))
+        records = cursor.fetchall()
+
+        return records
+    except:
+        return "failed"
 
 def insert_values_logging(apk_hash, package_name, timestamp, tc, error, uuid_execution):
     cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)

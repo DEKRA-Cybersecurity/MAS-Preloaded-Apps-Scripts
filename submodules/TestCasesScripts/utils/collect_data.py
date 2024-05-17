@@ -27,6 +27,7 @@ TABLE_REPORT = 'Report'
 TABLE_FAIL_COUNTS = 'Total_Fail_Counts'
 TABLE_LOGGING = 'Logging'
 TABLE_FINDINGS = 'Findings'
+TABLE_PERMISSIONS = 'Permissions'
 
 timestamp = sys.argv[1]
 uuid_execution = sys.argv[2]
@@ -57,6 +58,12 @@ def extract_logging():
     df = pd.read_sql(query, engine)
     return df
 
+def extract_permissions():
+    engine = create_engine(f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')
+    query = "SELECT HASH, APP_NAME, Permissions FROM Permissions WHERE ID_EXECUTION = '" + uuid_execution + "'"
+    df = pd.read_sql(query, engine)
+    return df
+
 def collect_data_script(uuid_execution):
 
     # Extract data from the database
@@ -64,6 +71,7 @@ def collect_data_script(uuid_execution):
     fail_counts_table = extract_total_fail_counts()
     logging_table = extract_logging()
     script_findings = extract_findings()
+    permissions_table = extract_permissions()
 
     # Formula execution and data extraction
     database_utils.unify_suid_permissions(uuid_execution)
@@ -82,6 +90,7 @@ def collect_data_script(uuid_execution):
         fail_counts_table.to_csv(path_export_csv + '/App_Analysis_Total_Fail_Counts_' + actual_timestamp + '.csv', index=False)
         logging_table.to_csv(path_export_csv + '/App_Analysis_Logging_' + actual_timestamp + '.csv', index=False)
         script_findings.to_csv(path_export_csv + '/App_Analysis_Findings_' + actual_timestamp + '.csv', index=False)
+        permissions_table.to_csv(path_export_csv + '/App_Analysis_Permissions_' + actual_timestamp + '.csv', index=False)
         data_formula = [['Formula'], [formatted_value]]
         df = pd.DataFrame(data_formula)
         # Export the DataFrame to a CSV file with no index and no header
@@ -95,6 +104,7 @@ def collect_data_script(uuid_execution):
         fail_counts_sheet = workbook.create_sheet(title='Total_Fail_Counts')
         formula_sheet = workbook.create_sheet(title='Formula')
         logging_sheet = workbook.create_sheet(title='Logging')
+        permissions_sheet = workbook.create_sheet(title='Permissions')
 
         # Convert DataFrames to rows and write to the corresponding sheets
         for row in dataframe_to_rows(report_table, index=False, header=True):
@@ -105,6 +115,9 @@ def collect_data_script(uuid_execution):
 
         for row in dataframe_to_rows(fail_counts_table, index=False, header=True):
             fail_counts_sheet.append(row)
+
+        for row in dataframe_to_rows(permissions_table, index=False, header=True):
+            permissions_sheet.append(row)
 
         for row in dataframe_to_rows(logging_table, index=False, header=True):
             logging_sheet.append(row)
