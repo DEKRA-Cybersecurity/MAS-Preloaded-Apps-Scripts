@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import requests
+import json
 
 def check_signature(wdir, apk, apk_hash, package_name, uuid_execution):
     '''
@@ -212,23 +213,33 @@ def parse_timestamp(timestamp):
     formatted_timestamp = parsed_timestamp.strftime('%Y%m%d_%H%M%S_%f')[:-3]
 
     return formatted_timestamp
+
+def load_ADA_json(filepath):
+    """Load JSON data from a file."""
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+    return data
     
-def check_scanned(apk_hash, package_name, wdir, uuid_execution):
+def check_scanned(apk_hash, package_name, wdir, uuid_execution, ada_json_path):
 
-    certs = requests.get("https://appdefense-dot-devsite-v2-prod-3p.appspot.com/directory/data/certs.json").json()
+    if os.path.exists(ada_json_path):
 
-    version_name = get_version_name(wdir)
-    semgrep = use_semgrep()
-    script_version = get_script_version()
+        data = load_ADA_json(ada_json_path)
+        certificates = data.get("certificates", [])
 
-    for cert in certs["certificates"]:
-        if 'packageName' in cert and cert['packageName'] == package_name:
-            database_utils.add_analyzed_app(apk_hash, uuid_execution, package_name, version_name, semgrep, script_version)
-            formula.extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution)
-            print('APP ' + package_name + ' scanned before.')
-            return True
+        version_name = get_version_name(wdir)
+        semgrep = use_semgrep()
+        script_version = get_script_version()
+
+        for certificate in certificates:
+            if certificate.get("packageName") == package_name:
+                database_utils.add_analyzed_app(apk_hash, uuid_execution, package_name, version_name, semgrep, script_version)
+                formula.extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution)
+                print('APP ' + package_name + ' scanned before.')
+                return True
+    else:
         
-    return False
+        return False    
 
 def remove_last_backslash(text):
     if text.endswith('\\'):
