@@ -3,6 +3,7 @@ from math import prod
 import sys
 sys.path.append('./')
 from db import database_utils
+from settings import SUID_SYSTEM
 import yaml
 
 # Scoring dictionary
@@ -17,21 +18,26 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
     wdir = wdir+"/base/AndroidManifest.xml"
     tree = ET.parse(wdir)
     root = tree.getroot()
+    suid = extract_SUID(tree)
     scoring = get_scoring()
-    # Extract permissions and calculate scores
     permissions = []
-    scores = []
-    for child in root.iter('uses-permission'):
-        permission = child.attrib.get('{http://schemas.android.com/apk/res/android}name')
-        if permission in scoring:
-            permissions.append(permission)
-            scores.append(scoring[permission])
+
+    if suid == SUID_SYSTEM:
+        permissions = extract_permissions()
+    else:
+        # Extract permissions and calculate scores
+        scores = []
+        for child in root.iter('uses-permission'):
+            permission = child.attrib.get('{http://schemas.android.com/apk/res/android}name')
+            if permission in scoring:
+                permissions.append(permission)
+                scores.append(scoring[permission])
 
     # Print the permissions and scores
     permissions_from_app = ','.join(str(x) for x in permissions)  #This is to upload the permissions to the table
     database_utils.insert_values_permissions(apk_hash, package_name, permissions_from_app, uuid_execution)
 
-    suid = extract_SUID(tree)
+    
     if suid is not None:
         database_utils.update_values_permissions_add_suid(apk_hash, suid, uuid_execution)
 
@@ -105,3 +111,11 @@ def get_scoring():
     permissions_weights_dict = {permission: data['weight'] for permission, data in config['permissions'].items()}
 
     return permissions_weights_dict
+
+def extract_permissions():
+    with open('config/methods_config.yml') as f:
+        data = yaml.load(f, Loader=yaml.SafeLoader)
+    
+    permissions = list(data['permissions'].keys())
+    
+    return permissions
