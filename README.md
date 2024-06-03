@@ -7,7 +7,7 @@ This project encompasses three Dockerfiles, which are:
 - dockerfile_extractor: This Dockerfile constructs a container designed to execute the contents of the AndScanner project, which are stored in the `/submodules` folder.
 - dockerfile_ubuntu_base: This Dockerfile creates a container image based on Ubuntu version 23.10.
 
-To complete the configuration of the repository, it will be necessary to clone the (following repository)[https://github.com/CookieCrumbs19212/AndScanner] inside the path `/submodules`
+To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/submodules`
 
 In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. Before building the Docker containers, it is essential to adjust these variables to your desired values.
 
@@ -193,3 +193,40 @@ If you want to re-launch the script with the normal behaviour it will be necessa
 
 ### Log: Application was decompiled and no sources folder was found.
 If the application does not contain source code directly in the package you are decompiling, jadx will not be able to create a /sources folder because there is simply no source code to extract.
+
+
+# Branching Strategy and Contributions
+This project currently uses a two-branch strategy to manage development and releases. Below is an explanation of the purpose of each branch and guidelines for contributing to the project.
+
+`Main Branch (main)`
+- Purpose: The main branch contains the primary, stable codebase of the project. This is the branch that end users should use to run the project.
+- Use: If you are using the project for its intended purpose and do not plan to develop new features, clone or download the main branch.
+
+`Development Branch (dev)`
+- Purpose: The dev branch is used for ongoing development and testing of new features. It serves as the integration branch where feature branches are merged after development.
+- Use: If you plan to contribute to the project by developing new features or making improvements, you should work with the dev branch.
+
+## Contribution Workflow
+1. Create a feature branch:
+    - When you start working on a new feature or fix, create a new branch from dev with a descriptive name (e.g., feature/login-improvement or bugfix/header-alignment).
+    ```
+    git checkout dev
+    git checkout -b feature/your-feature-name
+    ```
+
+2. Develop your feature:
+    - Implement your changes and commit them to your feature branch. Make sure your commits are atomic and have meaningful messages.
+
+3. Push your feature branch:
+    - Push your feature branch to the remote repository.
+    ```
+    git push origin feature/your-feature-name
+    ```
+
+4. Create a pull request:
+    - Once your feature is complete and tested, create a pull request (PR) to merge your feature branch into dev. Describe the changes you have made and any relevant details.
+    - Make sure your PR conforms to the project's contribution guidelines and passes all automated tests.
+
+5. Review and merge:
+    - Your PR will be reviewed by the maintainers. After approval and successful testing, it will be merged into the dev branch.
+    - Periodically, stable changes from dev will be merged into main.
