@@ -1,4 +1,5 @@
 #!/bin/bash
+
 hora_inicio=$(date +"%H:%M:%S")
 actual_timestamp=$(date +'%Y-%m-%d %H:%M:%S.%6N')
 uuid_execution=$(uuidgen)
@@ -8,6 +9,9 @@ testing=$1
 apk_path='apks/*'
 resultsPath='Results/'
 
+ADA_DIRECTORY="$path/results_api"
+ADA_JSON_FILE="certs.json"
+
 if [ "$testing" == "True" ]; then 
 	apk_path='unit_tests/reference_apk/*'
 	uuid_execution='55555555-4444-3333-2222-111111111111'
@@ -16,20 +20,36 @@ fi
 
 python3 -c "from db.database_utils import insert_new_execution; insert_new_execution('$uuid_execution', '$actual_timestamp')"
 
+getADAJson(){
+	URL="https://appdefense-dot-devsite-v2-prod-3p.appspot.com/directory/data/certs.json"
+	
+	# Create directory
+	mkdir -p "$ADA_DIRECTORY"
+
+	# Request to get JSON_FILE
+	curl -s "$URL" -o "$ADA_DIRECTORY/$ADA_JSON_FILE"
+
+	# Verify ADA_JSON_FILE was successfully downloaded
+	if [ $? -eq 0 ]; then
+	echo "App Defence Alliance results successfully saved."
+	else
+	echo "WARNING - There was a problem while downloading App Defence Alliance results."
+	fi
+}
+
 jadxFunction()
 {
 	mkdir $absolute_dir/decompiled;
 
 	python3 $path/utils/decompile_jadx.py $absolute_dir/decompiled $absolute_dir/base.apk $path;
 
-	# Estos dos greps se encargan de extraer las URLs dentro del codigo.
+	# Extracting the urls inside the code
 	grep -or -E "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/net2_$stripped.txt
 	grep -or -E "http:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/http_net2.txt
 	
-	# Parsear las urls para que tengan un formato concreto
+	# Parsing the URLS to a specific format
 	cat $absolute_dir/net2_$stripped.txt | cut -d "/" -f 3 | sort | uniq > $absolute_dir/_filtered_net2.txt
 
-	# Hay veces que cuando usas el apk tool no saca el apktool
 	cp $absolute_dir/decompiled/resources/AndroidManifest.xml $absolute_dir/base/AndroidManifest.xml
 	internet=$(cat $absolute_dir/base/AndroidManifest.xml | grep -E "INTERNET|ACCESS_NETWORK_STATE|ACCESS_WIFI_STATE")
   	suid=$(cat $absolute_dir/base/AndroidManifest.xml | grep -Po "(?<=android:sharedUserId=)\"[^\"]+\"" | sed 's/\"//g')
@@ -49,7 +69,7 @@ jadxFunction()
 	    fi
 	fi
 	cd $path
-	python3 main.py $absolute_dir $has_internet $uuid_execution;
+	python3 main.py $absolute_dir $has_internet $uuid_execution $ADA_DIRECTORY/$ADA_JSON_FILE;
 	sleep 2
 }
 
@@ -90,6 +110,8 @@ checkResultsDirectory(){
 		fi
 	fi 
 }
+
+getADAJson
 
 apktoolFunction
 
