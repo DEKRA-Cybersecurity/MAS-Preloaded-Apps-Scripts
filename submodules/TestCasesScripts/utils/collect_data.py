@@ -66,15 +66,15 @@ def extract_permissions():
 
 def collect_data_script(uuid_execution):
 
+    # Formula execution and data extraction
+    database_utils.unify_suid_permissions(uuid_execution)
+
     # Extract data from the database
     report_table = extract_report()
     fail_counts_table = extract_total_fail_counts()
     logging_table = extract_logging()
     script_findings = extract_findings()
     permissions_table = extract_permissions()
-
-    # Formula execution and data extraction
-    database_utils.unify_suid_permissions(uuid_execution)
 
     # Obtain test list
     with open('config/methods_config.yml') as f:

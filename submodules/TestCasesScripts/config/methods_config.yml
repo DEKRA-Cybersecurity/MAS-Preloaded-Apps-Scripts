@@ -1,4 +1,4 @@
-version: 2.5
+version: 2.6
 semgrep: False
 export_csv: False 
 database: automated_MASA
@@ -43,6 +43,10 @@ permissions:
     weight: 10
   android.permission.MOUNT_UNMOUNT_FILESYSTEMS: 
     weight: 10
+  android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE: 
+    weight: 10
+  android.permission.PROVIDE_REMOTE_CREDENTIALS:
+    weight: 10
   android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS: 
     weight: 7.5
   android.permission.READ_SMS: 
@@ -85,6 +89,12 @@ permissions:
     weight: 7.5
   android.permission.INTERNAL_SYSTEM_WINDOW: 
     weight: 7.5
+  android.permission.MANAGE_ONGOING_CALLS:
+    weight: 7.5
+  android.permission.READ_RESTRICTED_STATS:
+    weight: 7.5
+  android.permission.BIND_AUTOFILL_SERVICE:
+    weight: 7.5
   android.permission.ACCESS_COARSE_LOCATION: 
     weight: 5
   android.permission.CHANGE_COMPONENT_ENABLED_STATE: 
@@ -117,6 +127,18 @@ permissions:
     weight: 5
   android.permission.BODY_SENSORS: 
     weight: 5
+  android.permission.MANAGE_EXTERNAL_STORAGE:
+    weight: 5
+  android.permission.ACCESS_BLOBS_ACROSS_USERS:
+    weight: 5
+  android.permission.BLUETOOTH_ADVERTISE:
+    weight: 5
+  android.permission.READ_MEDIA_AUDIO:
+    weight: 5
+  android.permission.READ_MEDIA_IMAGES:
+    weight: 5
+  android.permission.READ_MEDIA_VIDEO:
+    weight: 5
   android.permission.DOWNLOAD_WITHOUT_NOTIFICATION: 
     weight: 2.5
   android.permission.PACKAGE_USAGE_STATS: 
@@ -130,6 +152,14 @@ permissions:
   android.permission.BLUETOOTH: 
     weight: 2.5
   android.permission.DEVICE_POWER: 
+    weight: 2.5
+  android.permission.READ_PRECISE_PHONE_STATE:
+    weight: 2.5
+  android.permission.LOG_FOREGROUND_RESOURCE_USE:
+    weight: 2.5
+  android.permission.MANAGE_DEFAULT_APPLICATIONS:
+    weight: 2.5
+  android.permission.MANAGE_FACE:
     weight: 2.5
   android.permission.ACCESS_NETWORK_STATE: 
     weight: 0

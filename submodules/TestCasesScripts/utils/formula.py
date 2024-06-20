@@ -48,11 +48,13 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
 get_risk returns the risk associated to a permission, if that app holds a "risky" permission.
 '''
 
-def get_m_value(p, tests, uuid_execution):
+
+def get_m_value(perm, tests, uuid_execution):
     total_fails = 0
     record_apps = database_utils.get_values_permissions(uuid_execution)
     for rapp in record_apps:
-        if p in rapp[3]:
+        permissions_list = get_permissions_list(rapp[3])
+        if perm in permissions_list:
             records = database_utils.get_values_total_fail_counts(rapp[0], tests, uuid_execution)
             for r in records:
                 for i in range(1,len(r)):
@@ -70,11 +72,12 @@ def get_risk(p, permissions):
 '''
 get_value_k returns the number of apps that holds permission p
 '''
-def get_value_k(p, uuid_execution):
+def get_value_k(perm, uuid_execution):
     total_apps = 0
     records = database_utils.get_values_permissions(uuid_execution)
-    for r in records:
-        if p in r[3]:
+    for row in records:
+        permissions_list = get_permissions_list(row[3])
+        if perm in permissions_list:
             total_apps += 1
 
     return total_apps
@@ -119,3 +122,11 @@ def extract_permissions():
     permissions = list(data['permissions'].keys())
     
     return permissions
+
+def get_permissions_list(permissions_str):
+    if permissions_str:
+        permissions_list = [element.strip() for element in permissions_str.split(",")] if permissions_str else []
+
+        return permissions_list
+
+    return []
