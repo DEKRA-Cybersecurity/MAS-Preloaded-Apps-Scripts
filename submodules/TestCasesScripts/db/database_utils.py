@@ -339,7 +339,7 @@ def get_scanned_apks(uuid_execution):
         return "failed"
 
 def unify_suid_permissions(uuid_execution):
-    all_perms = ""
+    
     cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
@@ -357,31 +357,32 @@ def unify_suid_permissions(uuid_execution):
             app_name = row[2]
             app_SUID = row[4]
             if app_SUID is not None: # if SUID is set 
-                if app_name != app_SUID: # if the package name is not the same as SUID, then append permissions
 
-                    # Get all permissions from current app
-                    cursor.execute(query_single_app, (app_name, uuid_execution, ))
-                    tuple_data = cursor.fetchall()[0]
-                    current_perm = tuple_data[1]
+                all_perms = ""
 
-                    # Get all apps where SUID is the same as the SUID of current app
-                    cursor.execute(query_all_perms, (app_SUID, uuid_execution, ))
-                    records_perm = cursor.fetchall()
-                    for record in records_perm:
-                        # If it is not the same app and permissions list is not empty, concatenate permissions list
-                        if record[0] != app_name and record[1] != "":
-                            all_perms += "," + record[1]
+                # Get all permissions from current app
+                cursor.execute(query_single_app, (app_name, uuid_execution, ))
+                tuple_data = cursor.fetchall()[0]
+                current_perm = tuple_data[1]
 
-                    current_perm += all_perms
-                    joined_permissions = current_perm.split(',')
+                # Get all apps where SUID is the same as the SUID of current app
+                cursor.execute(query_all_perms, (app_SUID, uuid_execution, ))
+                records_perm = cursor.fetchall()
+                for record in records_perm:
+                    # If it is not the same app and permissions list is not empty, concatenate permissions list
+                    if record[0] != app_name and record[1] != "":
+                        all_perms += "," + record[1]
 
-                    # From all permissions in current app, make a list with no duplications
-                    unique_permissions = [permission for i, permission in enumerate(joined_permissions) if permission not in joined_permissions[:i]]
+                current_perm += all_perms
+                joined_permissions = current_perm.split(',')
 
-                    # Concatenate all permissions from unique permissions
-                    result = ','.join(unique_permissions).rstrip(",").lstrip(",")
+                # From all permissions in current app, make a list with no duplications
+                unique_permissions = [permission for i, permission in enumerate(joined_permissions) if permission not in joined_permissions[:i]]
 
-                    update_values_permissions_add_new_permissions_set(app_SUID, result, uuid_execution)
+                # Concatenate all permissions from unique permissions
+                result = ','.join(unique_permissions).rstrip(",").lstrip(",")
+
+                update_values_permissions_add_new_permissions_set(app_SUID, result, uuid_execution)
 
     except Exception as e:
         print("Failed while unifying permissions")

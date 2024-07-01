@@ -19,22 +19,22 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
     tree = ET.parse(wdir)
     root = tree.getroot()
     suid = extract_SUID(tree)
-    scoring = get_scoring()
-    permissions = []
+    all_perms = set()
+    android_ns = 'http://schemas.android.com/apk/res/android'
+
+    # Extract permissions
+    for elem in root.iter():
+        if elem.tag == 'permission' or elem.tag == 'uses-permission':
+            name = elem.get(f'{{{android_ns}}}name')
+            if name:
+                all_perms.add(name)
 
     if suid == SUID_SYSTEM:
-        permissions = extract_permissions()
-    else:
-        # Extract permissions and calculate scores
-        scores = []
-        for child in root.iter('uses-permission'):
-            permission = child.attrib.get('{http://schemas.android.com/apk/res/android}name')
-            if permission in scoring:
-                permissions.append(permission)
-                scores.append(scoring[permission])
-
+        perms_config = extract_permissions()
+        all_perms.update(perms_config)
+        
     # Print the permissions and scores
-    permissions_from_app = ','.join(str(x) for x in permissions)  #This is to upload the permissions to the table
+    permissions_from_app = ','.join(str(x) for x in all_perms)  #This is to upload the permissions to the table
     database_utils.insert_values_permissions(apk_hash, package_name, permissions_from_app, uuid_execution)
 
     
