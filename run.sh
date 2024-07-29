@@ -36,7 +36,7 @@ if [ "$image" == "True" ]; then
       for IMAGE in "${VENDOR_IMAGES[@]}"; do
         EXTRACTION_LOGS="/tmp/logs"
         IMAGE_PATH="$VENDOR_DIR/$IMAGE"
-        docker run --tmpfs /tmp -v "$(pwd)/data/:/usr/src/app/data" -v "$EXTRACTION_LOGS:/usr/src/app/romanalyzer_extractor/log" -it android-scoring-extractor:latest "$IMAGE_PATH" "data/ramdisk"        
+        docker run --tmpfs /tmp -v "$(pwd)/data/:/usr/src/app/data" -v "$EXTRACTION_LOGS:/usr/src/app/romanalyzer_extractor/log" -it android-scoring-extractor:latest "$IMAGE_PATH" "data/ramdisk" "--extract"       
         echo "[+] Extracted the firmware image $IMAGE_PATH"
         EXTRACTED_IMAGE_PATH="$RAMDISK/$IMAGE.extracted"
         
