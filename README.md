@@ -10,7 +10,7 @@ This project encompasses three Dockerfiles, which are:
 
 To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/submodules`
 
-In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. Before building the Docker containers, it is essential to adjust these variables to your desired values.
+In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. It is important to specify the Android version of the device you are going to analyze (you must choose between 13 or 14 in the `androidVersion` parameter), depending on the version you choose, the script will consider a different set of permissions. Before building the Docker containers, it is essential to adjust these variables to your desired values.
 
 Once everything is configured, it's time to build the dockers by executing:
 

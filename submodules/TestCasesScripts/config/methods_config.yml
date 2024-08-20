@@ -1,7 +1,8 @@
-version: 2.7
+version: 2.8
 semgrep: False
 export_csv: False 
 database: automated_MASA
+androidVersion: 13
 tests:
   code:
     - code_1
@@ -19,159 +20,163 @@ tests:
   storage:
     - storage_2
 permissions:
-  android.permission.INSTALL_PACKAGES:
-    weight: 100
-  android.permission.COPY_PROTECTED_DATA:
-    weight: 10
-  android.permission.WRITE_SECURE_SETTINGS:
-    weight: 10
-  android.permission.READ_FRAME_BUFFER: 
-    weight: 10
-  android.permission.MANAGE_CA_CERTIFICATES: 
-    weight: 10
-  android.permission.MANAGE_APP_OPS_MODES: 
-    weight: 10
-  android.permission.GRANT_RUNTIME_PERMISSIONS: 
-    weight: 10
-  android.permission.DUMP: 
-    weight: 10
-  android.permission.CAMERA: 
-    weight: 10
-  android.permission.SYSTEM_CAMERA: 
-    weight: 10
-  android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS: 
-    weight: 10
-  android.permission.MOUNT_UNMOUNT_FILESYSTEMS: 
-    weight: 10
-  android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE: 
-    weight: 10
-  android.permission.PROVIDE_REMOTE_CREDENTIALS:
-    weight: 10
-  android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS: 
-    weight: 7.5
-  android.permission.READ_SMS: 
-    weight: 7.5
-  android.permission.WRITE_SMS: 
-    weight: 7.5
-  android.permission.RECEIVE_MMS: 
-    weight: 7.5
-  android.permission.SEND_SMS_NO_CONFIRMATION: 
-    weight: 7.5
-  android.permission.RECEIVE_SMS: 
-    weight: 7.5
-  android.permission.READ_LOGS: 
-    weight: 7.5
-  android.permission.READ_PRIVILEGED_PHONE_STATE: 
-    weight: 7.5
-  android.permission.LOCATION_HARDWARE: 
-    weight: 7.5
-  android.permission.ACCESS_FINE_LOCATION: 
-    weight: 7.5
-  android.permission.ACCESS_BACKGROUND_LOCATION: 
-    weight: 7.5
-  android.permission.BIND_ACCESSIBILITY_SERVICE: 
-    weight: 7.5
-  android.permission.ACCESS_WIFI_STATE: 
-    weight: 7.5
-  com.android.voicemail.permission.READ_VOICEMAIL: 
-    weight: 7.5
-  android.permission.RECORD_AUDIO: 
-    weight: 7.5
-  android.permission.CAPTURE_AUDIO_OUTPUT: 
-    weight: 7.5
-  android.permission.ACCESS_NOTIFICATIONS: 
-    weight: 7.5
-  android.permission.INTERACT_ACROSS_USERS_FULL: 
-    weight: 7.5
-  android.permission.BLUETOOTH_PRIVILEGED: 
-    weight: 7.5
-  android.permission.GET_PASSWORD: 
-    weight: 7.5
-  android.permission.INTERNAL_SYSTEM_WINDOW: 
-    weight: 7.5
-  android.permission.MANAGE_ONGOING_CALLS:
-    weight: 7.5
-  android.permission.READ_RESTRICTED_STATS:
-    weight: 7.5
-  android.permission.BIND_AUTOFILL_SERVICE:
-    weight: 7.5
-  android.permission.ACCESS_COARSE_LOCATION: 
-    weight: 5
-  android.permission.CHANGE_COMPONENT_ENABLED_STATE: 
-    weight: 5
-  android.permission.READ_CONTACTS: 
-    weight: 5
-  android.permission.WRITE_CONTACTS: 
-    weight: 5
-  android.permission.CONNECTIVITY_INTERNAL: 
-    weight: 5
-  android.permission.ACCESS_MEDIA_LOCATION: 
-    weight: 5
-  android.permission.READ_EXTERNAL_STORAGE: 
-    weight: 5
-  android.permission.WRITE_EXTERNAL_STORAGE: 
-    weight: 5
-  android.permission.SYSTEM_ALERT_WINDOW: 
-    weight: 5
-  android.permission.READ_CALL_LOG: 
-    weight: 5
-  android.permission.WRITE_CALL_LOG: 
-    weight: 5
-  android.permission.INTERACT_ACROSS_USERS: 
-    weight: 5
-  android.permission.MANAGE_USERS: 
-    weight: 5
-  android.permission.READ_CALENDAR: 
-    weight: 5
-  android.permission.BLUETOOTH_ADMIN: 
-    weight: 5
-  android.permission.BODY_SENSORS: 
-    weight: 5
-  android.permission.MANAGE_EXTERNAL_STORAGE:
-    weight: 5
-  android.permission.ACCESS_BLOBS_ACROSS_USERS:
-    weight: 5
-  android.permission.BLUETOOTH_ADVERTISE:
-    weight: 5
-  android.permission.READ_MEDIA_AUDIO:
-    weight: 5
-  android.permission.READ_MEDIA_IMAGES:
-    weight: 5
-  android.permission.READ_MEDIA_VIDEO:
-    weight: 5
-  android.permission.DOWNLOAD_WITHOUT_NOTIFICATION: 
-    weight: 2.5
-  android.permission.PACKAGE_USAGE_STATS: 
-    weight: 2.5
-  android.permission.MASTER_CLEAR: 
-    weight: 2.5
-  android.permission.DELETE_PACKAGES: 
-    weight: 2.5
-  android.permission.GET_PACKAGE_SIZE: 
-    weight: 2.5
-  android.permission.BLUETOOTH: 
-    weight: 2.5
-  android.permission.DEVICE_POWER: 
-    weight: 2.5
-  android.permission.READ_PRECISE_PHONE_STATE:
-    weight: 2.5
-  android.permission.LOG_FOREGROUND_RESOURCE_USE:
-    weight: 2.5
-  android.permission.MANAGE_DEFAULT_APPLICATIONS:
-    weight: 2.5
-  android.permission.MANAGE_FACE:
-    weight: 2.5
-  android.permission.ACCESS_NETWORK_STATE: 
-    weight: 0
-  android.permission.RECEIVE_BOOT_COMPLETED: 
-    weight: 0
-  android.permission.WAKE_LOCK: 
-    weight: 0
-  android.permission.FLASHLIGHT: 
-    weight: 0
-  android.permission.VIBRATE: 
-    weight: 0
-  android.permission.WRITE_MEDIA_STORAGE: 
-    weight: 0
-  android.permission.MODIFY_AUDIO_SETTINGS: 
-    weight: 0
+  13:
+      
+  14:
+    android.permission.PROVIDE_REMOTE_CREDENTIALS:
+      weight: 10   
+  both:
+    android.permission.INSTALL_PACKAGES:
+      weight: 100    
+    android.permission.COPY_PROTECTED_DATA:
+      weight: 10    
+    android.permission.WRITE_SECURE_SETTINGS:
+      weight: 10    
+    android.permission.READ_FRAME_BUFFER: 
+      weight: 10    
+    android.permission.MANAGE_CA_CERTIFICATES: 
+      weight: 10    
+    android.permission.MANAGE_APP_OPS_MODES: 
+      weight: 10    
+    android.permission.GRANT_RUNTIME_PERMISSIONS: 
+      weight: 10    
+    android.permission.DUMP: 
+      weight: 10    
+    android.permission.CAMERA: 
+      weight: 10    
+    android.permission.SYSTEM_CAMERA: 
+      weight: 10    
+    android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS: 
+      weight: 10    
+    android.permission.MOUNT_UNMOUNT_FILESYSTEMS: 
+      weight: 10    
+    android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE: 
+      weight: 10    
+    android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS: 
+      weight: 7.5   
+    android.permission.READ_SMS: 
+      weight: 7.5   
+    android.permission.WRITE_SMS: 
+      weight: 7.5   
+    android.permission.RECEIVE_MMS: 
+      weight: 7.5    
+    android.permission.SEND_SMS_NO_CONFIRMATION: 
+      weight: 7.5    
+    android.permission.RECEIVE_SMS: 
+      weight: 7.5    
+    android.permission.READ_LOGS: 
+      weight: 7.5   
+    android.permission.READ_PRIVILEGED_PHONE_STATE: 
+      weight: 7.5    
+    android.permission.LOCATION_HARDWARE: 
+      weight: 7.5   
+    android.permission.ACCESS_FINE_LOCATION: 
+      weight: 7.5   
+    android.permission.ACCESS_BACKGROUND_LOCATION: 
+      weight: 7.5   
+    android.permission.BIND_ACCESSIBILITY_SERVICE: 
+      weight: 7.5    
+    android.permission.ACCESS_WIFI_STATE: 
+      weight: 7.5    
+    com.android.voicemail.permission.READ_VOICEMAIL: 
+      weight: 7.5    
+    android.permission.RECORD_AUDIO: 
+      weight: 7.5    
+    android.permission.CAPTURE_AUDIO_OUTPUT: 
+      weight: 7.5    
+    android.permission.ACCESS_NOTIFICATIONS: 
+      weight: 7.5    
+    android.permission.INTERACT_ACROSS_USERS_FULL: 
+      weight: 7.5    
+    android.permission.BLUETOOTH_PRIVILEGED: 
+      weight: 7.5    
+    android.permission.GET_PASSWORD: 
+      weight: 7.5    
+    android.permission.INTERNAL_SYSTEM_WINDOW: 
+      weight: 7.5    
+    android.permission.MANAGE_ONGOING_CALLS:
+      weight: 7.5    
+    android.permission.READ_RESTRICTED_STATS:
+      weight: 7.5    
+    android.permission.BIND_AUTOFILL_SERVICE:
+      weight: 7.5    
+    android.permission.ACCESS_COARSE_LOCATION: 
+      weight: 5    
+    android.permission.CHANGE_COMPONENT_ENABLED_STATE: 
+      weight: 5   
+    android.permission.READ_CONTACTS: 
+      weight: 5   
+    android.permission.WRITE_CONTACTS: 
+      weight: 5   
+    android.permission.CONNECTIVITY_INTERNAL: 
+      weight: 5   
+    android.permission.ACCESS_MEDIA_LOCATION: 
+      weight: 5    
+    android.permission.READ_EXTERNAL_STORAGE: 
+      weight: 5   
+    android.permission.WRITE_EXTERNAL_STORAGE: 
+      weight: 5  
+    android.permission.SYSTEM_ALERT_WINDOW: 
+      weight: 5  
+    android.permission.READ_CALL_LOG: 
+      weight: 5   
+    android.permission.WRITE_CALL_LOG: 
+      weight: 5  
+    android.permission.INTERACT_ACROSS_USERS: 
+      weight: 5   
+    android.permission.MANAGE_USERS: 
+      weight: 5  
+    android.permission.READ_CALENDAR: 
+      weight: 5   
+    android.permission.BLUETOOTH_ADMIN: 
+      weight: 5   
+    android.permission.BODY_SENSORS: 
+      weight: 5
+    android.permission.MANAGE_EXTERNAL_STORAGE:
+      weight: 5
+    android.permission.ACCESS_BLOBS_ACROSS_USERS:
+      weight: 5
+    android.permission.BLUETOOTH_ADVERTISE:
+      weight: 5
+    android.permission.READ_MEDIA_AUDIO:
+      weight: 5
+    android.permission.READ_MEDIA_IMAGES:
+      weight: 5
+    android.permission.READ_MEDIA_VIDEO:
+      weight: 5
+    android.permission.DOWNLOAD_WITHOUT_NOTIFICATION: 
+      weight: 2.5
+    android.permission.PACKAGE_USAGE_STATS: 
+      weight: 2.5
+    android.permission.MASTER_CLEAR: 
+      weight: 2.5
+    android.permission.DELETE_PACKAGES: 
+      weight: 2.5
+    android.permission.GET_PACKAGE_SIZE: 
+      weight: 2.5
+    android.permission.BLUETOOTH: 
+      weight: 2.5
+    android.permission.DEVICE_POWER: 
+      weight: 2.5
+    android.permission.READ_PRECISE_PHONE_STATE:
+      weight: 2.5
+    android.permission.LOG_FOREGROUND_RESOURCE_USE:
+      weight: 2.5
+    android.permission.MANAGE_DEFAULT_APPLICATIONS:
+      weight: 2.5
+    android.permission.MANAGE_FACE:
+      weight: 2.5
+    android.permission.ACCESS_NETWORK_STATE: 
+      weight: 0
+    android.permission.RECEIVE_BOOT_COMPLETED: 
+      weight: 0
+    android.permission.WAKE_LOCK: 
+      weight: 0
+    android.permission.FLASHLIGHT: 
+      weight: 0
+    android.permission.VIBRATE: 
+      weight: 0
+    android.permission.WRITE_MEDIA_STORAGE: 
+      weight: 0
+    android.permission.MODIFY_AUDIO_SETTINGS: 
+      weight: 0

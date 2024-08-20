@@ -2,8 +2,10 @@ import mysql.connector
 from settings import DB_USER_MASA, DB_PASSWORD_MASA, DB_HOST_MASA
 import yaml
 
+
 def first_execution(database='automated_MASA'):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
 
     # cursor.execute('CREATE DATABASE ' + database)
@@ -101,8 +103,10 @@ def first_execution(database='automated_MASA'):
         )
     ''')
 
+
 def get_values_TestSSL_URLS(id_value):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -117,24 +121,30 @@ def get_values_TestSSL_URLS(id_value):
     except:
         return "failed"
 
+
 def add_analyzed_app(apk_hash, uuid_execution, app_name, version_name, semgrep, script_version):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query_report = """INSERT INTO Report (HASH, ID_EXECUTION, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     query_total_fail_counts = """INSERT INTO Total_Fail_Counts (HASH, ID_EXECUTION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-    try:    
-        cursor.execute(query_report, (apk_hash, uuid_execution, app_name, version_name, semgrep, script_version, 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS'))
-        cursor.execute(query_total_fail_counts, (apk_hash, uuid_execution, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+    try:
+        cursor.execute(query_report, (apk_hash, uuid_execution, app_name, version_name, semgrep,
+                       script_version, 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS'))
+        cursor.execute(query_total_fail_counts, (apk_hash,
+                       uuid_execution, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         cnx.commit()
     except Exception as e:
         print(f'FAIL: {e}')
         return "failed"
 
+
 def get_values_total_fail_counts(id_value, tests, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -150,11 +160,13 @@ def get_values_total_fail_counts(id_value, tests, uuid_execution):
     except:
         return "failed"
 
+
 def get_all_uuid_executions():
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
-    
+
     query = f"""SELECT ID FROM Executions"""
 
     try:
@@ -162,7 +174,7 @@ def get_all_uuid_executions():
         cursor.execute(query, )
         records = cursor.fetchall()
         ids = ""
-        
+
         if records:
             ids = [record[0] for record in records]
 
@@ -171,21 +183,25 @@ def get_all_uuid_executions():
     except:
         return "failed"
 
+
 def update_values(table, update_identifier, update_id_value, identifier, id_value, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = f"""UPDATE {table} SET {update_identifier} = %s WHERE {identifier} = %s and ID_EXECUTION = %s"""
-    
+
     try:
         cursor.execute(query, (update_id_value, id_value, uuid_execution,))
         cnx.commit()
     except:
         print("Something Failed in table " + table)
 
+
 def get_permissions_execution(uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -200,154 +216,180 @@ def get_permissions_execution(uuid_execution):
     except:
         return "failed"
 
+
 def insert_values_logging(apk_hash, package_name, timestamp, tc, error, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """INSERT INTO Logging (HASH, APP_NAME, TIMESTAMP, TESTCASE, ERROR, ID_EXECUTION) VALUES (%s, %s, %s, %s, %s, %s)"""
-    
-    try:    
-        cursor.execute(query, (apk_hash, package_name, timestamp, tc, error, uuid_execution))
+
+    try:
+        cursor.execute(query, (apk_hash, package_name,
+                       timestamp, tc, error, uuid_execution))
         cnx.commit()
     except:
         return "failed"
 
+
 def insert_new_finding(finding_data):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
-    
+
     query = """INSERT INTO Findings (HASH, APP_NAME, CATEGORY, CHECK_ID, PATH, LINE, ID_EXECUTION) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-    
-    try:    
+
+    try:
         cursor.execute(query, tuple(finding_data))
         cnx.commit()
     except Exception as e:
         print(f'FAIL: {e}')
         return "failed"
 
+
 def insert_new_report(report_data):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """INSERT INTO Report (HASH, ID_EXECUTION, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, CODE_1, CODE_2, CRYPTO_1, CRYPTO_3, NETWORK_1, NETWORK_2, NETWORK_3, PLATFORM_2, PLATFORM_3, STORAGE_2) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-    try:    
+    try:
         cursor.execute(query, tuple(report_data))
         cnx.commit()
     except Exception as e:
         print(f'FAIL: {e}')
         return "failed"
 
+
 def insert_new_execution(uuid_execution, timestamp):
 
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
-    
+
     query = """INSERT INTO Executions (ID, TIMESTAMP) VALUES (%s, %s)"""
-    
-    try:    
+
+    try:
         cursor.execute(query, (uuid_execution, timestamp, ))
         cnx.commit()
     except Exception as e:
         print(f'FAIL: {e}')
         return "failed"
 
+
 def insert_values_report(apk_hash, app_name, version_name, semgrep, script_version, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """INSERT INTO Report (HASH, APP_NAME, VERSION_NAME, SEMGREP, SCRIPT_VERSION, ID_EXECUTION) VALUES (%s, %s, %s, %s, %s, %s)"""
-    
-    try:    
-        cursor.execute(query, (apk_hash, app_name, version_name, semgrep, script_version, uuid_execution))
+
+    try:
+        cursor.execute(query, (apk_hash, app_name, version_name,
+                       semgrep, script_version, uuid_execution))
         cnx.commit()
     except:
         return "failed"
 
+
 def insert_values_permissions(apk_hash, package, permissions, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """INSERT INTO Permissions (HASH, APP_NAME, Permissions, ID_EXECUTION) VALUES (%s, %s, %s, %s)"""
-    
-    try:    
-        cursor.execute(query, (apk_hash, package, permissions, uuid_execution,))
+
+    try:
+        cursor.execute(query, (apk_hash, package,
+                       permissions, uuid_execution,))
         cnx.commit()
     except:
         return "failed"
 
+
 def update_values_permissions_add_suid(apk_hash, suid, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """UPDATE Permissions SET SUID = %s WHERE HASH = %s and ID_EXECUTION = %s"""
-    
-    try:    
+
+    try:
         cursor.execute(query, (suid, apk_hash, uuid_execution))
         cnx.commit()
     except:
         return "failed"
 
+
 def update_values_permissions_add_new_permissions_set(suid, permissions, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """UPDATE Permissions SET Permissions = %s WHERE SUID = %s and ID_EXECUTION = %s"""
-    
-    try:    
+
+    try:
         cursor.execute(query, (permissions, suid, uuid_execution,))
         cnx.commit()
     except:
         return "failed"
 
+
 def set_risk_score(uuid_execution, risk_score):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """UPDATE Executions SET RISK_SCORE = %s WHERE ID = %s"""
-    
+
     try:
         cursor.execute(query, (risk_score, uuid_execution,))
         cnx.commit()
     except:
         print("Something Failed in table Executions")
 
+
 def get_scanned_apks(uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
-    query = "SELECT count(*) FROM Report WHERE ID_EXECUTION = '" + uuid_execution + "'"
+    query = "SELECT count(*) FROM Report WHERE ID_EXECUTION = '" + \
+        uuid_execution + "'"
 
     try:
         cursor = cnx.cursor()
         cursor.execute(query)
         # Fetch the result
         count = cursor.fetchone()[0]
-        
+
         return count
     except:
         return "failed"
 
+
 def unify_suid_permissions(uuid_execution):
-    
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """SELECT * FROM Permissions WHERE ID_EXECUTION = %s"""
     query_single_app = """SELECT p.APP_NAME, p.Permissions FROM Permissions p WHERE p.APP_NAME = %s AND p.ID_EXECUTION = %s"""
     query_all_perms = """SELECT p.APP_NAME, p.Permissions, p.SUID FROM Permissions p WHERE SUID = %s AND p.ID_EXECUTION = %s"""
-    
+
     try:
         cursor = cnx.cursor(buffered=False)
         cursor.execute(query, (uuid_execution,))
@@ -356,7 +398,7 @@ def unify_suid_permissions(uuid_execution):
         for row in records:
             app_name = row[2]
             app_SUID = row[4]
-            if app_SUID is not None: # if SUID is set 
+            if app_SUID is not None:  # if SUID is set
 
                 all_perms = ""
 
@@ -377,19 +419,23 @@ def unify_suid_permissions(uuid_execution):
                 joined_permissions = current_perm.split(',')
 
                 # From all permissions in current app, make a list with no duplications
-                unique_permissions = [permission for i, permission in enumerate(joined_permissions) if permission not in joined_permissions[:i]]
+                unique_permissions = [permission for i, permission in enumerate(
+                    joined_permissions) if permission not in joined_permissions[:i]]
 
                 # Concatenate all permissions from unique permissions
                 result = ','.join(unique_permissions).rstrip(",").lstrip(",")
 
-                update_values_permissions_add_new_permissions_set(app_SUID, result, uuid_execution)
+                update_values_permissions_add_new_permissions_set(
+                    app_SUID, result, uuid_execution)
 
     except Exception as e:
         print("Failed while unifying permissions")
         return "failed"
-    
+
+
 def get_values_permissions(uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
@@ -404,34 +450,40 @@ def get_values_permissions(uuid_execution):
     except:
         return "failed"
 
+
 def insert_values_total_fail_count(apk_hash, uuid_execution):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = f"""INSERT INTO Total_Fail_Counts (HASH, ID_EXECUTION) VALUES (%s, %s)"""
-    
-    try:    
+
+    try:
         cursor.execute(query, (apk_hash, uuid_execution,))
         cnx.commit()
     except:
         return "failed"
 
+
 def insert_values_testsslURLs(url, result):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
     query = """INSERT INTO TestSSL_URLS (URL, RESULT) VALUES (%s, %s)"""
-    
-    try:    
+
+    try:
         cursor.execute(query, (url, result))
         cnx.commit()
     except:
         return "failed"
 
+
 def clear_database(database='automated_MASA'):
-    cnx = mysql.connector.connect(host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cnx = mysql.connector.connect(
+        host=DB_HOST_MASA, user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + database)
 
@@ -442,7 +494,7 @@ def clear_database(database='automated_MASA'):
     query_Findings = '''DELETE FROM Findings'''
     query_Executions = '''DELETE FROM Executions'''
 
-    try:    
+    try:
         cursor.execute(query_Report)
         cursor.execute(query_Permissions)
         cursor.execute(query_Total_Fail_Counts)
@@ -452,6 +504,7 @@ def clear_database(database='automated_MASA'):
         cnx.commit()
     except:
         print("Failed")
+
 
 def get_database_name():
     with open('config/methods_config.yml') as f:

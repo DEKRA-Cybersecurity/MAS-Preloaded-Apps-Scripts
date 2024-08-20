@@ -1,18 +1,21 @@
+import yaml
+from settings import SUID_SYSTEM
+from db import database_utils
 import xml.etree.ElementTree as ET
 from math import prod
 import sys
 sys.path.append('./')
-from db import database_utils
-from settings import SUID_SYSTEM
-import yaml
 
 # Scoring dictionary
+
 
 def extract_SUID(tree):
     root = tree.getroot()
 
-    shared_user_id = root.get('{http://schemas.android.com/apk/res/android}sharedUserId')
+    shared_user_id = root.get(
+        '{http://schemas.android.com/apk/res/android}sharedUserId')
     return shared_user_id
+
 
 def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
     wdir = wdir+"/base/AndroidManifest.xml"
@@ -30,19 +33,21 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
                 all_perms.add(name)
 
     if suid == SUID_SYSTEM:
-        perms_config = extract_permissions()
+        perms_config = get_all_permissions()
         all_perms.update(perms_config)
-        
+
     # Print the permissions and scores
-    permissions_from_app = ','.join(str(x) for x in all_perms)  #This is to upload the permissions to the table
-    database_utils.insert_values_permissions(apk_hash, package_name, permissions_from_app, uuid_execution)
-
-    
+    # This is to upload the permissions to the table
+    permissions_from_app = ','.join(str(x) for x in all_perms)
+    database_utils.insert_values_permissions(
+        apk_hash, package_name, permissions_from_app, uuid_execution)
     if suid is not None:
-        database_utils.update_values_permissions_add_suid(apk_hash, suid, uuid_execution)
+        database_utils.update_values_permissions_add_suid(
+            apk_hash, suid, uuid_execution)
 
-#FORMULA IS:
+# FORMULA IS:
 # All apps permission shall be extracted prior to formula calculation
+
 
 '''
 get_risk returns the risk associated to a permission, if that app holds a "risky" permission.
@@ -55,12 +60,14 @@ def get_m_value(perm, tests, uuid_execution):
     for rapp in record_apps:
         permissions_list = get_permissions_list(rapp[3])
         if perm in permissions_list:
-            records = database_utils.get_values_total_fail_counts(rapp[0], tests, uuid_execution)
+            records = database_utils.get_values_total_fail_counts(
+                rapp[0], tests, uuid_execution)
             for r in records:
-                for i in range(1,len(r)):
+                for i in range(1, len(r)):
                     total_fails += r[i]
 
     return total_fails
+
 
 def get_risk(p, permissions):
     scoring = get_scoring()
@@ -68,10 +75,13 @@ def get_risk(p, permissions):
         return scoring[p]
     else:
         return 0
-    
+
+
 '''
 get_value_k returns the number of apps that holds permission p
 '''
+
+
 def get_value_k(perm, uuid_execution):
     total_apps = 0
     records = database_utils.get_values_permissions(uuid_execution)
@@ -82,50 +92,83 @@ def get_value_k(perm, uuid_execution):
 
     return total_apps
 
+
 def calculate_formula(Constant1, Constant2, tests, uuid_execution):
     result = 0
     all_permissions = get_all_permissions()
     for p in all_permissions:
-        risk = get_risk(p, all_permissions)  # Replace `get_risk(p)` with your specific risk calculation for each p
-        value_k = get_value_k(p, uuid_execution)  # Replace `get_value_k(p)` with your specific value K calculation for each p
+        # Replace `get_risk(p)` with your specific risk calculation for each p
+        risk = get_risk(p, all_permissions)
+        # Replace `get_value_k(p)` with your specific value K calculation for each p
+        value_k = get_value_k(p, uuid_execution)
         M = get_m_value(p, tests, uuid_execution)
-        term = risk * (1 - ((1 - Constant1) ** value_k) * ((1 - Constant2) ** M))
+        term = risk * (1 - ((1 - Constant1) ** value_k)
+                       * ((1 - Constant2) ** M))
 
         result += term
-    
     risk_score = round(result, 4)
 
     database_utils.set_risk_score(uuid_execution, risk_score)
 
     return risk_score
 
+
+def get_android_version():
+    try:
+        with open('config/methods_config.yml') as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
+
+        android_version = int(config.get("androidVersion", 0))
+        return android_version
+
+    except:
+        print("Error while getting android version from config file.")
+        return 0
+
+
 def get_all_permissions():
+
+    android_version = get_android_version()
+
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    permissions_list = list(config['permissions'].keys())
+    permissions_list_android_version = []
+    if config['permissions'][android_version]:
+        permissions_list_android_version = list(
+            config['permissions'][android_version].keys())
+
+    permissions_list_both = list(config['permissions']['both'].keys())
+
+    permissions_list = permissions_list_android_version + permissions_list_both
+    permissions_list.sort()
 
     return permissions_list
 
+
 def get_scoring():
+
+    android_version = get_android_version()
+
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    permissions_weights_dict = {permission: data['weight'] for permission, data in config['permissions'].items()}
+    permissions_weights_dict_android_version = {
+        permission: data['weight'] for permission, data in config['permissions'][android_version].items()}
 
-    return permissions_weights_dict
+    permissions_weights_dict_both = {
+        permission: data['weight'] for permission, data in config['permissions']['both'].items()}
 
-def extract_permissions():
-    with open('config/methods_config.yml') as f:
-        data = yaml.load(f, Loader=yaml.SafeLoader)
-    
-    permissions = list(data['permissions'].keys())
-    
-    return permissions
+    combined_permissions_weights = {
+        **permissions_weights_dict_android_version, **permissions_weights_dict_both}
+
+    return combined_permissions_weights
+
 
 def get_permissions_list(permissions_str):
     if permissions_str:
-        permissions_list = [element.strip() for element in permissions_str.split(",")] if permissions_str else []
+        permissions_list = [element.strip() for element in permissions_str.split(
+            ",")] if permissions_str else []
 
         return permissions_list
 
