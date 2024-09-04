@@ -1,8 +1,0 @@
-mysql-connector-python==8.2.0
-pandas==2.0.3
-numpy==1.26.0
-openpyxl==3.1.2
-sqlalchemy==2.0.23
-pytest-order==1.1.0
-PyYAML==6.0.1
-semgrep==1.51.0

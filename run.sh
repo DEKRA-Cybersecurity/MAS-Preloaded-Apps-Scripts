@@ -1,110 +1,127 @@
 #!/bin/bash
-set -e;
 
-IMAGES_PATH='data/images/';
-IMAGES=($(ls $IMAGES_PATH));
-RAMDISK="$(pwd)/data/ramdisk"
-RESULTS="$(pwd)/data/results"
-mkdir -p "$RESULTS"
-APK_PATH="$RAMDISK/apks"
+export PYTHONPATH=$(pwd)
 
-image=$1
+hora_inicio=$(date +"%H:%M:%S")
+actual_timestamp=$(date +'%Y-%m-%d %H:%M:%S.%6N')
+uuid_execution=$(uuidgen)
 
-# If there is no network testcases, create it
-if ! sudo docker network ls --format '{{.Name}}' | grep -q "^testcases$"; then
-    sudo docker network create testcases;
-    echo "[+] Created the network"
+path=$(pwd)
+input=$1
+apk_path='data/apks/*'
+resultsPath='results/'
+
+ADA_DIRECTORY="$path/data/"
+ADA_JSON_FILE="certs.json"
+
+if [ -n "$input" ] && [ "$input" == "test" ]; then 
+	apk_path='unit_tests/reference_apk/*'
+	uuid_execution='55555555-4444-3333-2222-111111111111'
+	echo "Unit tests will be executed."
 fi
 
-# If there is no container db, create it
-if ! sudo docker ps -a --format '{{.Names}}' | grep -q "^db$"; then
-    sudo docker run -it -e MYSQL_RANDOM_ROOT_PASSWORD=1 -e MYSQL_USER=masa_script -e MYSQL_PASSWORD=MASA123 -e MYSQL_DATABASE=automated_MASA --name db --network testcases -d mysql:8
-    sudo docker run --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest python3 -c "import time; time.sleep(15); from db.database_utils import first_execution; first_execution()"
-    echo "[+] Created the Test Cases database"
+if [ -n "$input" ] && [ "$input" != "test" ]; then 
+    python3 utils/extract_apks_from_image.py "$input"
 fi
 
-if [ "$image" == "True" ]; then 
+python3 -c "from db.database_utils import insert_new_execution; insert_new_execution('$uuid_execution', '$actual_timestamp')"
 
-  if [ "$(ls -A "$APK_PATH")" ]; then
-    sudo rm -r "$APK_PATH"/*
-  fi
+getADAJson(){
+	URL="https://appdefense-dot-devsite-v2-prod-3p.appspot.com/directory/data/certs.json"
 
-  for DIRECTORY in "${IMAGES[@]}"; do
-    VENDOR_DIR="$IMAGES_PATH$DIRECTORY"
-    if [ -d "$VENDOR_DIR" ]; then
-      VENDOR_IMAGES=($(ls "$VENDOR_DIR"))
-      for IMAGE in "${VENDOR_IMAGES[@]}"; do
-        EXTRACTION_LOGS="/tmp/logs"
-        IMAGE_PATH="$VENDOR_DIR/$IMAGE"
-        docker run --tmpfs /tmp -v "$(pwd)/data/:/usr/src/app/data" -v "$EXTRACTION_LOGS:/usr/src/app/romanalyzer_extractor/log" -it android-scoring-extractor:latest "$IMAGE_PATH" "data/ramdisk" "--extract"       
-        echo "[+] Extracted the firmware image $IMAGE_PATH"
-        EXTRACTED_IMAGE_PATH="$RAMDISK/$IMAGE.extracted"
-        
-        IMAGE="${IMAGE/.zip/}"
-        IMAGE="${IMAGE/.rar/}"
-        APKS=($(sudo find "$EXTRACTED_IMAGE_PATH" -name "*.apk"))
-        mkdir -m 777 -p "$APK_PATH"
-        mkdir -m 777 -p "$APK_PATH/$IMAGE"
+	# Request to get JSON_FILE
+	curl -s "$URL" -o "$ADA_DIRECTORY/$ADA_JSON_FILE"
 
-        # Run the Test Cases script
-        for APK in "${APKS[@]}"; do
-          sudo mv "$APK" "$APK_PATH/$IMAGE"
-        done;
+	# Verify ADA_JSON_FILE was successfully downloaded
+	if [ $? -eq 0 ]; then
+	echo "App Defence Alliance results successfully saved."
+	else
+	echo "WARNING - There was a problem while downloading App Defence Alliance results."
+	fi
+}
 
-        APK_FILES=($(sudo find $APK_PATH/$IMAGE -type f -name \*.apk))
+jadxFunction()
+{
+	mkdir $absolute_dir/decompiled;
 
-        for APK in "${APK_FILES[@]}"; do
-          DIR="${APK/.apk/}"
-          mkdir -p "$DIR"
-          mv "$APK" "$DIR"
-        done;
-        
-        sudo rm -r "$EXTRACTED_IMAGE_PATH"
+	python3 $path/utils/decompile_jadx.py $absolute_dir/decompiled $absolute_dir/base.apk $path;
 
-        if [ ! -d "$APK_PATH/$IMAGE/Results" ]; then
-          # Create Results folder
-          mkdir -m 777 -p "$APK_PATH/$IMAGE/Results"
-        fi
-          
-        sudo docker run -v "$APK_PATH/$IMAGE:/usr/src/app/apks" -v "$APK_PATH/$IMAGE/Results:/usr/src/app/Results" --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest /bin/bash automate_apps_updated 1
-        echo "[+] Ran the TestCases script" 
+	# Extracting the urls inside the code
+	grep -or -E "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/net2_$stripped.txt
+	grep -or -E "http:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"  $absolute_dir/decompiled/ --exclude-dir=resources --no-filename 2>/dev/null | uniq > $absolute_dir/http_net2.txt
+	
+	# Parsing the URLS to a specific format
+	cat $absolute_dir/net2_$stripped.txt | cut -d "/" -f 3 | sort | uniq > $absolute_dir/_filtered_net2.txt
 
-        folder_results=$(ls "$APK_PATH/$IMAGE/Results/" -1 | head -n 1)
+	cp $absolute_dir/decompiled/resources/AndroidManifest.xml $absolute_dir/base/AndroidManifest.xml
+	internet=$(cat $absolute_dir/base/AndroidManifest.xml | grep -E "INTERNET|ACCESS_NETWORK_STATE|ACCESS_WIFI_STATE")
+  	suid=$(cat $absolute_dir/base/AndroidManifest.xml | grep -Po "(?<=android:sharedUserId=)\"[^\"]+\"" | sed 's/\"//g')
+	if [[ ! -z "$suid" ]]; then
+	    if [[  -z "$internet"  ]]; then
+	      echo "0" > $absolute_dir/$suid
+		  has_internet=0
+	    else
+		  has_internet=1
+	      find $path -name $suid -exec echo "1" > {} \;  
+	    fi  
+	else
+	    if [[  ! -z "$internet" ]]; then
+	      has_internet=1
+	    else
+	      has_internet=0
+	    fi
+	fi
+	cd $path
+	python3 main.py $absolute_dir $has_internet $uuid_execution $ADA_DIRECTORY/$ADA_JSON_FILE;
+	sleep 2
+}
 
-        sudo mv "$APK_PATH/$IMAGE/Results/$folder_results" "$RESULTS/"
-       
-      done;
-    fi
-  done;
+apktoolFunction()
+{
+	for dir in $apk_path
+	do
+		absolute_dir=`realpath $dir`;
+		mv $absolute_dir/*.apk $absolute_dir/base.apk 2>/dev/null;
+		cd $absolute_dir
+		if [[ $(ls | grep -x base | wc -l) -eq 0 && $(ls | grep -x base.apk | wc -l) -eq 1 && ! -f "apkTool.txt"  ]]; then			
+			python3 $path/utils/decompile_apktool.py $absolute_dir/base.apk $path;
+			touch apkTool.txt
+			jadxFunction
+			if [ $(find $absolute_dir/base -name "*apk" | wc -l) -ne 0 ]; then
+				for apk in $(find $absolute_dir/base -name "*apk")
+				do
+					stripped=$(echo $apk | cut -d "/" -f 10 | cut -d "." -f 1)
+					mkdir $path/$stripped/ && mv $apk $path/$stripped/base.apk
+					cd $path
+					apktoolFunction
+				done
+			else
+				cd $path
+			fi
+		else
+			cd $path
+		fi
+	done
+}
 
-else
+checkResultsDirectory(){
+	if [ ! -d "$resultsPath" ]; then
+		mkdir -p "$resultsPath"
+		if [  ! -d "$resultsPath" ]; then
+			echo "Error creating the Results directory."
+			exit 1
+		fi
+	fi 
+}
 
-  if [ ! -d "$APK_PATH" ]; then
-      echo "The specified directory does not exist."
-      return 1
-  fi
+getADAJson
 
-  for apk_file in "$APK_PATH"/*.apk; do
-    if [ -f "$apk_file" ]; then
-      apk_name="${apk_file##*/}"
-      apk_name="${apk_name%.apk}"
-      folder_name="${APK_PATH}/${apk_name}"
+apktoolFunction
 
-      if [ ! -d "$folder_name" ]; then
-          mkdir -m 777 -p "$folder_name"
-      fi
+checkResultsDirectory
 
-      mv "$apk_file" "$folder_name"
-    fi
-  done
-    
-  uuid=$(sudo docker run -v "$APK_PATH:/usr/src/app/apks" -v "$APK_PATH/Results:/usr/src/app/Results" --rm --network testcases --name testcases-setup -it android-scoring-testcases:latest /bin/bash automate_apps_updated 1 | tee /dev/tty | grep "UUID:" | awk '{print $2}')
-  echo "[+] Ran the TestCases script" 
+python3 utils/collect_data.py "$actual_timestamp" $uuid_execution;
 
-  folder_results=$(ls "$APK_PATH/Results/" -1 | head -n 1)
+find . -name "apkTool.txt" -exec rm {} \;
 
-  sudo mv "$APK_PATH/Results/$folder_results" "$RESULTS/"
-
-  sudo rm -rf "$APK_PATH/Results/"
-  
-fi
+echo "Analysis successfully executed"

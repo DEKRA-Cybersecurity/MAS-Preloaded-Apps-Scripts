@@ -1,66 +1,10 @@
-# Docker
-
-## Getting started
-
-This project encompasses three Dockerfiles, which are:
-
-- dockerfile_testcases: This Dockerfile generates an Ubuntu-based container image, tailored for executing Python scripts. It is specifically configured to run Python scripts from the TestCasesScripts project.
-- dockerfile_extractor: This Dockerfile constructs a container designed to execute the contents of the AndScanner project, which are stored in the `/submodules` folder.
-- dockerfile_ubuntu_base: This Dockerfile creates a container image based on Ubuntu version 23.10.
-
-To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/submodules`
-
-In the TestCasesScripts project, there exist configuration variables (`/submodules/TestCasesScripts/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. It is important to specify the Android version of the device you are going to analyze (you must choose between 13 or 14 in the `androidVersion` parameter), depending on the version you choose, the script will consider a different set of permissions. Before building the Docker containers, it is essential to adjust these variables to your desired values.
-
-Once everything is configured, it's time to build the dockers by executing:
-
-```
-sudo docker build -t ubuntu_base:latest -f dockerfile_ubuntu_base .;
-```
-
-```
-sudo docker build -t android-scoring-testcases:latest -f dockerfile_testcases .;
-```
-
-```
-sudo docker build -t android-scoring-extractor:latest -f dockerfile_extractor .;
-```
-
-Then, analysis can be initiated. To proceed, store the image of the application or set of applications and execute the file run.sh using the following command:
-
-- In case a device image will be analysed, run:
-
-```
-sudo ./run.sh True
-```
-
-- In case a set of apps will be analysed, run:
-
-```
-sudo ./run.sh
-```
-
-## Types of Scans
-
-Dockers can be run in two different ways: through the image of a device or through a set of applications of your choice.
-
-### Device image
-
-To scan the image from a device, it is necessary to store the image in the `/data/images/` folder. Within the `/data/images/` directory, create a subfolder named after the vendor for each image. For example, `/data/images/<VENDOR_NAME>/`.
-
-When inserting the image of a device into the `/<VENDOR_NAME>` folder, it must be a compressed file, such as .zip, .rar or .tar.gz.
-
-### Set of applications
-
-It is also possible to scan a set of applications without the need of a device image. This can be achieved by storing all the applications (apk files) in the following path: `/data/ramdisk/apks/`
-
 # Scripts MASA
 
 ## Getting started
 
 This Python project is designed to perform static analysis of Android Apps to cover 10 MASA test cases (CODE-1, CODE-2, CRYPTO-1, CRYPTO-3, NETWORK-1, NETWORK-2, NETWORK-3, PLATFORM-2, PLATFORM-3 and STORAGE-2). The main script extracts details such as the APK name, version, urls and permissions requested by the application, based on these parameters and the execution of the test cases, it provides a value that indicates the risk score of a set of applications.
 
-The results of the analysis are stored both in a MySQL database distributed in different tables and in an Excel file, which allows easy access and visualization of the data collected. In this excel you can see four tabs which are:
+The results of the analysis are stored both in a MySQL database distributed in different tables and in an Excel file or CSV file, which allows easy access and visualization of the data collected. In this excel you can see four tabs which are:
 
 - Report: It stores the hash and app name of each application as well as the result (PASS, FAIL, Needs Review, NA) for each test case.
 - Findings: In this sheet it is possible to see for each test case on which file it has matched (some test cases indicate the match line, in other cases it is not possible).
@@ -97,7 +41,7 @@ sudo systemctl start mysql
 mysql -u root -p
 ```
 
-- Create a user named `masa_script`, as in settings.py , and grant it privileges. One can
+- Create a user named `masa_script`, as in settings.py , and grant it privileges. You could
   also choose other credentials and update the file settings.py
 
 ```
@@ -109,32 +53,33 @@ mysql> exit;
 
 ## Documentation
 
-Once the necessary packages have been installed, a folder called apks has to be created, where the apks to be analysed will be stored.
-To store applications in the apks folder, applications will have to be separated by folders as follows:
-
-- `/scripts-masa`: Main project directory.
-  - `/apks`: Directory that will contain all apks.
-    - `/folder_1`: Subdirectory containing apk_1.
-      - `app_1.apk`
-    - `/folder_2`: Subdirectory containing apk_2.
-      - `app_2.apk`
-    - `/folder_3`: Subdirectory containing apk_3.
-      - `app_3.apk`
-    - ...
-
-Once the database has been created, it will be necessary to execute the following command to create all the tables and structure of the database:
+Once the necessary packages have been installed, it will be necessary to execute the following command to create all the tables and structure of the database:
 
 ```
 python3 -c "from db.database_utils import first_execution; first_execution()"
 ```
 
-With the applications already stored in `/apks` and the database tables created, it is now possible to run the script using the following command:
+To complete the configuration of the repository, it will be necessary to clone the [following repository](https://github.com/CookieCrumbs19212/AndScanner) inside the path `/tools`
+
+Inside the project, exists a configuration variables file (`/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. It is important to specify the Android version of the device you are going to analyze (you must choose between 13 or 14 in the `androidVersion` parameter), depending on the version you choose, the script will consider a different set of permissions. Before executing the analysis, it is essential to adjust these variables to your desired values.
+
+Then, analysis can be initiated. To proceed, store the image of the application or set of applications and execute the file run.sh using the following command:
+
+- In case a device image will be analysed, run:
 
 ```
-./automate_apps_updated
+./run.sh VENDOR_NAME
 ```
 
-As a result of the analysis the data obtained will be exported, there are two options CSV or XLXS, to choose the format you must access the configuration file located in the path `/config/methods_config.yml` and give value (True/False) to the variable export_csv. The exported data can be found in the folder **/Results/YYYYYYYYYYMMdd/HHmmss**.
+`VENDOR_NAME` will be the name of the folder where you have stored the image (`/data/images/<VENDOR_NAME>`)
+
+- In case a set of apps will be analysed, run:
+
+```
+./run.sh
+```
+
+As a result of the analysis the data obtained will be exported, there are two options CSV or XLXS, to choose the format you must access the configuration file located in the path `/config/methods_config.yml` and give value (True/False) to the variable export*csv. The exported data can be found in the folder `/results/YYYYYYYYYYMMdd_ms*<ID_EXECUTION>/`.
 
 In case you want to delete all the data in the database, you will need to execute the following command:
 
@@ -142,25 +87,64 @@ In case you want to delete all the data in the database, you will need to execut
 python3 -c "from db.database_utils import clear_database; clear_database()"
 ```
 
+## Types of Scans
+
+Script can be run in two different ways: through the image of a device or through a set of applications of your choice.
+
+### Device image
+
+To scan the image from a device, it is necessary to store the image in the `/data/images/` folder. Within the `/data/images/` directory, create a subfolder named after the vendor for each image. For example, `/data/images/<VENDOR_NAME>/`.
+
+When inserting the image of a device into the `/<VENDOR_NAME>` folder, it must be a compressed file, such as .zip, .rar or .tar.gz.
+
+### Set of applications
+
+It is also possible to scan a set of applications without the need of a device image. This can be achieved by storing all the applications (apk files) in the following path: `/data/apks/`
+
+To store applications in the apks folder, applications will have to be separated by folders as follows:
+
+- `/MAS-Preloaded-Apps-Scripts`: Main project directory.
+  - `/data`: Directory that contains all the necessary data to execute the analysis.
+    - `/apks`: Directory that will contain all apks.
+      - `/folder_1`: Subdirectory containing apk_1.
+        - `app_1.apk`
+      - `/folder_2`: Subdirectory containing apk_2.
+        - `app_2.apk`
+      - `/folder_3`: Subdirectory containing apk_3.
+        - `app_3.apk`
+      - ...
+
 ## Database structure
 
-`TestSSL_URL:`
-This table stores the URLs that have already been scanned in NETWORK-2 test case and the result.
-`Findings:`
-This table stores all the matches found in the test cases. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file. In some test cases where multiline match is required, it is not possible to get the line number of the match.  
-`Report:`
-This table stores the result of the test cases (PASS, FAIL or Need Review), information about the scan and information of the application. The application information stored is the hash, app_name and version_name to identify it. Regarding the scan information, it stores if semgrep option is enabled or not and the version of the script used in the analysis.  
-`Total_Fail_Counts:`
-This table stores the hash of the application along with the number of matches found for each test case.  
-`Logging:`
-This table stores information about events that occurred during the execution of the script. The hash of the application and the time of the event is also stored, as well as the error message.  
-`Permissions:`
-This table stores the Android permissions required by the application.
-`Executions:` This table stores the identifier of the analysis with the timestamp.
+- `TestSSL_URL:`
+  This table stores the URLs that have already been scanned in NETWORK-2 test case and the result.
+- `Findings:`
+  This table stores all the matches found in the test cases. It stores the hash of the application and the app_name, as well as the category and ID of the test case and the path where the match is located, along with the line number in the file. In some test cases where multiline match is required, it is not possible to get the line number of the match.
+- `Report:`
+  This table stores the result of the test cases (PASS, FAIL or Need Review), information about the scan and information of the application. The application information stored is the hash, app_name and version_name to identify it. Regarding the scan information, it stores if semgrep option is enabled or not and the version of the script used in the analysis.
+- `Total_Fail_Counts:`
+  This table stores the hash of the application along with the number of matches found for each test case.
+- `Logging:`
+  This table stores information about events that occurred during the execution of the script. The hash of the application and the time of the event is also stored, as well as the error message.
+- `Permissions:`
+  This table stores the Android permissions required by the application.
+- `Executions:` This table stores the identifier of the analysis with the timestamp.
 
 ## Risk Score
 
 To understand the result of the Risk Score, how its value is obtained, what parameters are taken into account and what formula is used, [read this paper](https://docs.google.com/document/d/1dnjXoHpVL5YmZTqVEC9b9JOfu6EzQiizZAHVAeDoIlo/edit).
+
+If you need to recalculate the risk score of an execution, you can do so using the recalculate_risk_score.py script (located in /utils folder). This script allows you to send the ID_EXECUTION of the execution you want to recalculate or the path to the results folder where the CSV files containing the execution's data are located.
+
+```
+python3 utils/recalculate_risk_score.py "ID_EXECUTION"
+```
+
+or
+
+```
+python3 utils/recalculate_risk_score.py "~/MAS-Preloaded-Apps-Scripts/results/YYYYMMdd_HHmmss_ms_ID_EXECUTION"
+```
 
 **What is the Shared User Id (SUID)?**
 The Shared User Id is a tag found in the AndroidManifest.xml and influences the formula value.
@@ -203,7 +187,7 @@ python3 -c "from db.database_utils import first_execution; first_execution('auto
 3. Run an analysis prior to launching the unit tests, our input variables are the apks found in the /unit_tests/reference_apk/\* directory. To run the analysis we have to launch the command:
 
 ```
-./automated_apps_updated True
+./run.sh True
 ```
 
 With this command we will run an analysis of the applications but we will use the variables, directories and databases destined for unit tests.
@@ -223,7 +207,7 @@ python3 -c "from db.database_utils import clear_database; clear_database('automa
 If you want to re-launch the script with the normal behaviour it will be necessary to revert the changes, to do this we will have to change the value of the variable of the configuration file `database` to `automated_MASA` and launch the script with the command
 
 ```
-./automated_apps_updated
+./run.sh
 ```
 
 ## Logging information
