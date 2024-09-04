@@ -3,7 +3,7 @@ from math import prod
 import sys
 sys.path.append('./')
 from db import database_utils
-# from settings import SUID_SYSTEM
+from settings import SUID_SYSTEM
 import yaml
 
 # Scoring dictionary
@@ -29,9 +29,9 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
             if name:
                 all_perms.add(name)
 
-    # if suid == SUID_SYSTEM:
-    #     perms_config = get_all_permissions()
-    #     all_perms.update(perms_config)
+    if suid == SUID_SYSTEM:
+        perms_config = get_all_permissions()
+        all_perms.update(perms_config)
 
     # Print the permissions and scores
     permissions_from_app = ','.join(str(x) for x in all_perms)  #This is to upload the permissions to the table
