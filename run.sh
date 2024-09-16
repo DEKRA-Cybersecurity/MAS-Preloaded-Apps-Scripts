@@ -22,6 +22,9 @@ fi
 
 if [ -n "$input" ] && [ "$input" != "test" ]; then 
     python3 utils/extract_apks_from_image.py "$input"
+	python3 utils/extract_metadata.py "$uuid_execution" true
+else
+	python3 utils/extract_metadata.py "$uuid_execution"
 fi
 
 python3 -c "from db.database_utils import insert_new_execution; insert_new_execution('$uuid_execution', '$actual_timestamp')"

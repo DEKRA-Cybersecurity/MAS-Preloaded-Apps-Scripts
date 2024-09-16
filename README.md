@@ -11,6 +11,7 @@ The results of the analysis are stored both in a MySQL database distributed in d
 - Total_Fail_Counts: Indicates for each test case how many matches have been found, it is necessary for the calculation of the formula.
 - Formula: Indicates the value obtained when calculating the risk score.
 - Logging: In case of obtaining failures during the analysis, these will be registered in this table.
+- Device_Metadata: In this sheet will be stored the metadata of the device from which the applications have been scanned.
 
 ## Installation
 
@@ -63,6 +64,8 @@ To complete the configuration of the repository, it will be necessary to clone t
 
 Inside the project, exists a configuration variables file (`/config/methods_config.yml`) that can be modified to set your preferences. These variables include the export format (xlxs or csv), the use of semgrep during test case execution and the database name. It is important to specify the Android version of the device you are going to analyze (you must choose between 13 or 14 in the `androidVersion` parameter), depending on the version you choose, the script will consider a different set of permissions. Before executing the analysis, it is essential to adjust these variables to your desired values.
 
+If the applications to be scanned belong to a mobile device, it is necessary to fill in the information from the configuration file (`/config/methods_config.yml`). Within this file, there is an object called "metadata" where you must specify the brand, device, name, version_release, ID, version_incremental, type, and tags. If the analysis is performed on a device image, this data will be automatically extracted from the image.
+
 Then, analysis can be initiated. To proceed, store the image of the application or set of applications and execute the file run.sh using the following command:
 
 - In case a device image will be analysed, run:
@@ -114,6 +117,7 @@ To store applications in the apks folder, applications will have to be separated
         - `app_3.apk`
       - ...
 
+
 ## Database structure
 
 - `TestSSL_URL:`
@@ -129,6 +133,7 @@ To store applications in the apks folder, applications will have to be separated
 - `Permissions:`
   This table stores the Android permissions required by the application.
 - `Executions:` This table stores the identifier of the analysis with the timestamp.
+- `Device_Metadata:` This table stores the metadata of the device from which the applications have been scanned. 
 
 ## Risk Score
 

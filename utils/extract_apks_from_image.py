@@ -56,12 +56,26 @@ def get_apks():
     except Exception as e:
         print(e)
 
+def get_buildprop():
+
+    filename = "build.prop"
+    buildprop_path = ""
+
+    for root, dirs, files in os.walk(apks_dir, image_name+'.extracted'):
+        if filename in files:
+            buildprop_path = os.path.join(root, filename)
+    
+
+    shutil.copy(buildprop_path, apks_dir)
+    print("Build prop file extracted from image device.")
+    
 
 def main():
 
     print('Extracting apks from image device.')
     extract_image()
     os.chdir(main_path)
+    get_buildprop()
     get_apks()
 
 

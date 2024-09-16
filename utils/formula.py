@@ -3,7 +3,7 @@ from math import prod
 import sys
 sys.path.append('./')
 from db import database_utils
-from settings import SUID_SYSTEM
+# from settings import SUID_SYSTEM
 import yaml
 
 # Scoring dictionary
@@ -29,9 +29,9 @@ def extract_and_store_permissions(apk_hash, package_name, wdir, uuid_execution):
             if name:
                 all_perms.add(name)
 
-    if suid == SUID_SYSTEM:
-        perms_config = get_all_permissions()
-        all_perms.update(perms_config)
+    # if suid == SUID_SYSTEM:
+    #     perms_config = get_all_permissions()
+    #     all_perms.update(perms_config)
 
     # Print the permissions and scores
     permissions_from_app = ','.join(str(x) for x in all_perms)  #This is to upload the permissions to the table
@@ -89,7 +89,11 @@ def calculate_formula(Constant1, Constant2, tests, uuid_execution):
         term = risk * (1 - ((1 - Constant1) ** value_k) * ((1 - Constant2) ** M))
 
         result += term
-    risk_score = round(result, 4)
+
+    formula_value = round(result, 4)
+    sum_weights = get_sum_weights()
+
+    risk_score = (formula_value / sum_weights) * 100
 
     database_utils.set_risk_score(uuid_execution, risk_score)
 
@@ -116,14 +120,9 @@ def get_all_permissions():
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    permissions_list_android_version = []
+    permissions_list = []
     if config['permissions'][android_version]:
-        permissions_list_android_version = list(config['permissions'][android_version].keys())
-
-    permissions_list_both = list(config['permissions']['both'].keys())
-
-    permissions_list = permissions_list_android_version + permissions_list_both
-    permissions_list.sort()
+        permissions_list = list(config['permissions'][android_version].keys())
 
     return permissions_list
 
@@ -135,17 +134,11 @@ def get_scoring():
     with open('config/methods_config.yml') as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 
-    permissions_weights_dict_android_version = {}
+    permissions_weights_dict = {}
     if config['permissions'][android_version]:
-        permissions_weights_dict_android_version = {permission: data['weight'] for permission, data in config['permissions'][android_version].items()}
+        permissions_weights_dict = {permission: data['weight'] for permission, data in config['permissions'][android_version].items()}
 
-    permissions_weights_dict_both = {
-        permission: data['weight'] for permission, data in config['permissions']['both'].items()}
-
-    combined_permissions_weights = {
-        **permissions_weights_dict_android_version, **permissions_weights_dict_both}
-
-    return combined_permissions_weights
+    return permissions_weights_dict
 
 
 def get_permissions_list(permissions_str):
@@ -156,3 +149,22 @@ def get_permissions_list(permissions_str):
         return permissions_list
 
     return []
+
+def get_sum_weights():
+
+    android_version = get_android_version()
+
+    with open('config/methods_config.yml') as f:
+        config = yaml.load(f, Loader=yaml.SafeLoader)
+
+    total_weight = 0
+
+    permissions = config.get('permissions', {})
+    if android_version in permissions:
+        version_permissions = permissions[android_version] 
+        for key, value in version_permissions.items():
+            total_weight += value.get('weight', 0)
+    else:
+        print('The Android version you have specified in the config file does not have an associated permissions list.')
+
+    return total_weight

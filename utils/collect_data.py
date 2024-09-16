@@ -28,6 +28,7 @@ TABLE_FAIL_COUNTS = 'Total_Fail_Counts'
 TABLE_LOGGING = 'Logging'
 TABLE_FINDINGS = 'Findings'
 TABLE_PERMISSIONS = 'Permissions'
+TABLE_METADATA = 'Device_Metadata'
 
 timestamp = sys.argv[1]
 uuid_execution = sys.argv[2]
@@ -76,6 +77,14 @@ def extract_permissions():
     df = pd.read_sql(query, engine)
     return df
 
+def extract_metadata():
+    engine = create_engine(
+        f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')
+    query = "SELECT BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS FROM Device_Metadata WHERE ID_EXECUTION = '" + \
+        uuid_execution + "'"
+    df = pd.read_sql(query, engine)
+    return df
+
 
 def collect_data_script(uuid_execution):
 
@@ -88,6 +97,7 @@ def collect_data_script(uuid_execution):
     logging_table = extract_logging()
     script_findings = extract_findings()
     permissions_table = extract_permissions()
+    metadata_table = extract_metadata()
 
     # Obtain test list
     with open('config/methods_config.yml') as f:
@@ -110,6 +120,8 @@ def collect_data_script(uuid_execution):
             path_export_csv + '/App_Analysis_Findings_' + actual_timestamp + '.csv', index=False)
         permissions_table.to_csv(
             path_export_csv + '/App_Analysis_Permissions_' + actual_timestamp + '.csv', index=False)
+        metadata_table.to_csv(
+            path_export_csv + '/App_Analysis_Device_Info_' + actual_timestamp + '.csv', index=False)
         data_formula = [['Formula'], [formatted_value]]
         df = pd.DataFrame(data_formula)
         # Export the DataFrame to a CSV file with no index and no header
@@ -125,6 +137,7 @@ def collect_data_script(uuid_execution):
         formula_sheet = workbook.create_sheet(title='Formula')
         logging_sheet = workbook.create_sheet(title='Logging')
         permissions_sheet = workbook.create_sheet(title='Permissions')
+        metadata_sheet = workbook.create_sheet(title='Device_Info')
 
         # Convert DataFrames to rows and write to the corresponding sheets
         for row in dataframe_to_rows(report_table, index=False, header=True):
@@ -141,6 +154,9 @@ def collect_data_script(uuid_execution):
 
         for row in dataframe_to_rows(logging_table, index=False, header=True):
             logging_sheet.append(row)
+        
+        for row in dataframe_to_rows(metadata_table, index=False, header=True):
+            metadata_sheet.append(row)
 
         formula_sheet.append(["Formula Value"])
         formula_sheet.append([value])

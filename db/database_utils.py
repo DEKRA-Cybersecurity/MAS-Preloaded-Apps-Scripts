@@ -102,6 +102,20 @@ def first_execution(database='automated_MASA'):
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE Device_Metadata (
+            ID_EXECUTION VARCHAR(255),
+            BRAND VARCHAR(255),
+            DEVICE VARCHAR(255),
+            NAME VARCHAR(255), 
+            VERSION_RELEASE VARCHAR(255), 
+            ID VARCHAR(255), 
+            VERSION_INCREMENTAL VARCHAR(255), 
+            TYPE VARCHAR(255), 
+            TAGS VARCHAR(255)
+        )
+    ''')
+
 
 def get_values_TestSSL_URLS(id_value):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
@@ -509,3 +523,16 @@ def get_database_name():
     database = config.get("database", {})
 
     return str(database)
+
+def insert_metadata(uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags):
+    cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
+    cursor = cnx.cursor()
+    cursor.execute('USE ' + get_database_name())
+
+    query = """INSERT INTO Device_Metadata (ID_EXECUTION, BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
+    try:
+        cursor.execute(query, (uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags))
+        cnx.commit()
+    except:
+        return "failed"
