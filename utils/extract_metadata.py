@@ -20,6 +20,7 @@ def extract_metadata_device():
                 brand, device, name, version_release, build_id, version_incremental, build_type, tags = fingerprint.replace(':', '/').split('/')
 
                 metadata = {
+                    'fingerprint': fingerprint,
                     'brand': brand,
                     'device': device,
                     'name': name,
@@ -49,7 +50,7 @@ def main():
     else:
         metadata = extract_metadata_config()
 
-    database_utils.insert_metadata(id_execution, metadata["brand"], metadata["device"], metadata["name"], metadata["version_release"], metadata["id"], metadata["version_incremental"], metadata["type"], metadata["tags"])
+    database_utils.insert_metadata(id_execution, metadata["brand"], metadata["device"], metadata["name"], metadata["version_release"], metadata["id"], metadata["version_incremental"], metadata["type"], metadata["tags"], metadata["fingerprint"])
 
 if __name__ == "__main__":
 

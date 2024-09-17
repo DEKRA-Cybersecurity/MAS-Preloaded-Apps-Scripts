@@ -1,4 +1,4 @@
-version: 2.10
+version: 2.10.1
 semgrep: False
 export_csv: False 
 database: automated_MASA
@@ -12,6 +12,7 @@ metadata:
   version_incremental: 
   type: 
   tags: 
+  fingerprint: 
 tests:
   code:
     - code_1

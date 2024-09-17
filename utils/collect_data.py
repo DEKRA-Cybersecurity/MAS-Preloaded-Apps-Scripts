@@ -9,7 +9,6 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 import mysql.connector  # Import MySQL connector library
-# from ..settings import DB_USER_MASA, DB_PASSWORD_MASA
 import yaml
 
 import sys
@@ -80,7 +79,7 @@ def extract_permissions():
 def extract_metadata():
     engine = create_engine(
         f'mysql+mysqlconnector://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}/{db_config["database"]}')
-    query = "SELECT BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS FROM Device_Metadata WHERE ID_EXECUTION = '" + \
+    query = "SELECT BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS, FINGERPRINT FROM Device_Metadata WHERE ID_EXECUTION = '" + \
         uuid_execution + "'"
     df = pd.read_sql(query, engine)
     return df

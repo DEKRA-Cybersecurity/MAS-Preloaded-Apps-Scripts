@@ -112,7 +112,9 @@ def first_execution(database='automated_MASA'):
             ID VARCHAR(255), 
             VERSION_INCREMENTAL VARCHAR(255), 
             TYPE VARCHAR(255), 
-            TAGS VARCHAR(255)
+            TAGS VARCHAR(255),
+            FINGERPRINT VARCHAR(300),
+            PRIMARY KEY (ID_EXECUTION, FINGERPRINT)       
         )
     ''')
 
@@ -524,15 +526,15 @@ def get_database_name():
 
     return str(database)
 
-def insert_metadata(uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags):
+def insert_metadata(uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags, fingerprint):
     cnx = mysql.connector.connect(user=DB_USER_MASA, password=DB_PASSWORD_MASA)
     cursor = cnx.cursor()
     cursor.execute('USE ' + get_database_name())
 
-    query = """INSERT INTO Device_Metadata (ID_EXECUTION, BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO Device_Metadata (ID_EXECUTION, BRAND, DEVICE, NAME, VERSION_RELEASE, ID, VERSION_INCREMENTAL, TYPE, TAGS, FINGERPRINT) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
     try:
-        cursor.execute(query, (uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags))
+        cursor.execute(query, (uuid_execution, brand, device, name, version_release, id, version_incremental, type, tags, fingerprint))
         cnx.commit()
     except:
         return "failed"
