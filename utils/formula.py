@@ -111,6 +111,30 @@ def get_android_version():
     except:
         print("Error while getting android version from config file.")
         return 0
+    
+def get_p_value():
+    try:
+        with open('config/methods_config.yml') as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
+
+        p_value = float(config.get("formula_p", 0))
+        return p_value
+
+    except:
+        print("Error while getting p value from config file.")
+        return 0
+    
+def get_q_value():
+    try:
+        with open('config/methods_config.yml') as f:
+            config = yaml.load(f, Loader=yaml.SafeLoader)
+
+        q_value = float(config.get("formula_q", 0))
+        return q_value
+
+    except:
+        print("Error while getting q value from config file.")
+        return 0
 
 
 def get_all_permissions():

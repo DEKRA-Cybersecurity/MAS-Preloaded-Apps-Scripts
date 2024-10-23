@@ -5,6 +5,7 @@ import sys
 import auxiliar_functions
 import pandas as pd
 import uuid
+from formula import get_p_value, get_q_value
 sys.path.append('./')
 
 main_path = os.getcwd()
@@ -20,8 +21,11 @@ def calculate_risk_score(id_execution):
         tests_list = [value.upper() for values in config['tests'].values()
                       for value in values]
 
+        p_value = get_p_value()
+        q_value = get_q_value()
+
         risk_score = formula.calculate_formula(
-            0.01, 0.01, tests_list, str(id_execution))
+            p_value, q_value, tests_list, str(id_execution))
         print("The risk score have been recalculated. The new value is " +
               str(risk_score) + '.')
         return risk_score

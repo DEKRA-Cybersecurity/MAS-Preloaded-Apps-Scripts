@@ -10,6 +10,7 @@ path=$(pwd)
 input=$1
 apk_path='data/apks/*'
 resultsPath='results/'
+config_file='config/methods_config.yml'
 
 ADA_DIRECTORY="$path/data/"
 ADA_JSON_FILE="certs.json"
@@ -41,6 +42,9 @@ getADAJson(){
 	else
 	echo "WARNING - There was a problem while downloading App Defence Alliance results."
 	fi
+
+	python3 utils/add_certified_ADA.py "$config_file" "$ADA_DIRECTORY/$ADA_JSON_FILE"
+
 }
 
 jadxFunction()

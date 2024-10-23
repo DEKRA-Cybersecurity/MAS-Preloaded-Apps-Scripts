@@ -5,6 +5,7 @@ from db import database_utils
 import utils.formula as formula
 import os
 from datetime import datetime
+from formula import get_q_value, get_p_value
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -105,7 +106,10 @@ def collect_data_script(uuid_execution):
     tests_list = [value.upper() for values in config['tests'].values()
                   for value in values]
 
-    value = formula.calculate_formula(0.01, 0.01, tests_list, uuid_execution)
+    p_value = get_p_value()
+    q_value = get_q_value()
+
+    value = formula.calculate_formula(p_value, q_value, tests_list, uuid_execution)
     formatted_value = '{:.4f}'.format(value).replace('.', ',')
 
     if export_csv():

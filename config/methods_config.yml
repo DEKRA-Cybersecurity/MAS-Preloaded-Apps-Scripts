@@ -1,8 +1,10 @@
-version: 2.10.1
+version: 2.11
 semgrep: False
 export_csv: False 
 database: automated_MASA
 androidVersion: 13
+formula_p: 0.000400
+formula_q: 0.000400
 metadata:
   brand: 
   device: 
@@ -13,6 +15,29 @@ metadata:
   type: 
   tags: 
   fingerprint: 
+certified_apps:
+  - com.google.android.configupdater
+  - com.google.android.feedback
+  - com.google.android.onetimeinitializer
+  - com.google.android.gsf
+  - com.google.android.syncadapters.calendar
+  - com.google.android.gms.policy_sidecar_aps
+  - com.android.wallpaperbackup
+  - com.google.android.as.oss
+  - com.android.server.telecom
+  - com.android.settings
+  - com.android.bluetooth
+  - com.android.dynsystem
+  - com.android.shell
+  - com.android.keychain
+  - com.google.SSRestartDetector
+  - com.android.providers.settings
+  - com.android.inputdevices
+  - com.google.android.factoryota
+  - com.google.android.packageinstaller
+  - com.android.managedprovisioning
+  - com.google.android.setupwizard
+  - com.android.phone
 tests:
   code:
     - code_1
