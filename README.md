@@ -1,4 +1,4 @@
-# Scripts MASA
+# Preloaded Apps Risk Score Script
 
 ## Getting started
 
