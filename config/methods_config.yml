@@ -591,3 +591,54 @@ permissions:
       weight: 2.5
     android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS:
       weight: 2.5
+  17:
+    android.permission.ALLOW_CONTROL_SYSTEM_REQUIRED_PACKAGES:
+      weight: 10
+    android.permission.INJECT_KEY_EVENTS:
+      weight: 10
+    android.permission.READ_ASSIST_STRUCTURE_SCREEN_CONTENT:
+      weight: 7.5
+    android.permission.ACCESS_LOCAL_NETWORK:
+      weight: 7.5
+    android.permission.REQUEST_TASK_HANDOFF:
+      weight: 7.5
+    android.permission.LOCK_APPS:
+      weight: 5
+    android.permission.USE_ICC_AUTH:
+      weight: 5
+    android.permission.MANAGE_SERIAL_PORTS:
+      weight: 5
+    android.permission.CAPTURE_KEYBOARD:
+      weight: 5
+    android.permission.PERSONAL_CONTEXT_PUBLISH_INSIGHTS:
+      weight: 5
+    android.permission.PERSONAL_CONTEXT_PUBLISH_HINTS:
+      weight: 5
+    android.permission.READ_LOCATION_BYPASS_ALLOWLIST:
+      weight: 5
+    android.permission.READ_REMOTE_TASKS:
+      weight: 5
+    android.permission.CONFIGURE_ANOMALY_DETECTOR:
+      weight: 5
+    android.permission.READ_MEDIA_DOCUMENTS:
+      weight: 5
+    android.permission.ACCESS_COMPANION_INFO:
+      weight: 5
+    android.permission.SEND_DYNAMIC_INSTRUMENTATION_EVENTS:
+      weight: 5
+    android.permission.MANAGE_CONTACTS_PICKER_SESSION:
+      weight: 5
+    android.permission.MANAGE_AISEAL_VIRTUAL_MACHINE:
+      weight: 5
+    android.permission.DEVELOPER_VERIFICATION_AGENT:
+      weight: 5
+    android.permission.MANAGE_MULTIUSER_DEVICE_PROVISIONING_STATE:
+      weight: 5
+    android.permission.SIGN_WITH_TRUST_TOKEN:
+      weight: 2.5
+    android.permission.ACQUIRE_VERIFIED_DEVICE_TOKEN:
+      weight: 2.5
+    android.permission.ACCESS_HID:
+      weight: 2.5
+    android.permission.MANAGE_SUPERVISION:
+      weight: 2.5
